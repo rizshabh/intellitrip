@@ -60,11 +60,6 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Debugging: Prevent unexpected exits and log them
-setInterval(() => {
-    // Keep-alive loop
-}, 5000 * 60);
-
 const originalExit = process.exit;
 process.exit = (code) => {
     console.error(`Process exit called with code: ${code}`);
@@ -85,16 +80,6 @@ app.listen(PORT, async () => {
     } else {
         console.error('CRITICAL ERROR: index.html NOT found at:', indexPath);
     }
-
-    // Auto-open browser
-    const { exec } = require('child_process');
-    const url = `http://localhost:${PORT}`;
-    const start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
-    exec(`${start} ${url}`, (error) => {
-        if (error) {
-            console.error('Failed to open browser:', error);
-        }
-    });
 
     try {
         const res = await db.query('SELECT NOW()');
