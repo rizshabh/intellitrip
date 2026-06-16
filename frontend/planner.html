@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliTrip | Smart Planner</title>
+    <!-- Dependencies -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="premium.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f8fafc;
+            overflow: hidden;
+        }
+
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader-ring {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2A8FAA;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loader-text {
+            margin-top: 1.5rem;
+            font-family: 'Poppins', sans-serif;
+            color: #0B3B5B;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- This sidebar is empty but needed for app.js to detect 'isDashboard' state -->
+    <aside class="sidebar" style="display: none;"></aside>
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader-ring"></div>
+        <div class="loader-text">Waking up the AI Travel Genius...</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="currency_service.js"></script>
+    <script src="app.js"></script>
+    <script src="planner.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tripId = urlParams.get('id');
+
+            if (!tripId) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            // Wait for App to be initialized and trips to be loaded
+            const interval = setInterval(async () => {
+                if (window.app && window.app.isLoggedIn) {
+                    // Force load data if it hasn't started (since sidebar is hidden)
+                    if (window.app.allTrips.length === 0) {
+                        try {
+                            await window.app.loadTripsData();
+                        } catch (e) {
+                            console.error("Failed to load trips for planner", e);
+                        }
+                    }
+
+                    if (window.app.allTrips.length > 0) {
+                        clearInterval(interval);
+                        document.getElementById('loadingScreen').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('loadingScreen').style.display = 'none';
+                            window.openTripPlanner(tripId);
+                        }, 500);
+                    }
+                } else if (window.app && !window.app.isLoggedIn) {
+                    clearInterval(interval);
+                    window.location.href = 'login.html';
+                }
+            }, 200);
+        });
+    </script>
+</body>
+
+</html>

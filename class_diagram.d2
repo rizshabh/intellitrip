@@ -1,0 +1,571 @@
+
+# ============================================================
+#  IntelliTrip - Full Class Diagram  (D2 Playground)
+# ============================================================
+
+direction: right
+
+# ─────────────────────────────────────────────
+#  LAYER 1 – DATABASE MODELS
+# ─────────────────────────────────────────────
+
+User: {
+  shape: class
+
+  +id: Integer [PK]
+  +name: String
+  +email: String [UNIQUE]
+  +password: String [hashed]
+  +profile_picture: String
+  +otp: String
+  +otp_expires: Timestamp
+  +is_verified: Boolean
+  +preferred_currency: String
+  +upi_id: String
+  +email_notifications: Boolean
+  +push_notifications: Boolean
+  +profile_visibility: String
+  +created_at: Timestamp
+}
+
+PendingRegistration: {
+  shape: class
+
+  +id: Integer [PK]
+  +email: String [UNIQUE]
+  +name: String
+  +password: String [hashed]
+  +otp: String
+  +otp_expires: Timestamp
+  +created_at: Timestamp
+}
+
+Trip: {
+  shape: class
+
+  +id: Integer [PK]
+  +user_id: Integer [FK → User]
+  +destination: String
+  +start_date: Date
+  +end_date: Date
+  +budget: Decimal
+  +notes: Text
+  +collaborators: Text
+  +travelers: Integer
+  +travel_style: String
+  +created_at: Timestamp
+}
+
+Expense: {
+  shape: class
+
+  +id: Integer [PK]
+  +user_id: Integer [FK → User]
+  +trip_id: Integer [FK → Trip]
+  +payer_id: Integer [FK → User]
+  +category: String
+  +amount: Decimal
+  +description: Text
+  +date: Timestamp
+  +receipt_url: String
+  +split_type: String
+  +split_details: JSONB
+  +settled_uids: JSONB
+  +updated_at: Timestamp
+  +created_at: Timestamp
+}
+
+ItineraryItem: {
+  shape: class
+
+  +id: Integer [PK]
+  +trip_id: Integer [FK → Trip]
+  +day_number: Integer
+  +type: String
+  +title: String
+  +description: Text
+  +start_time: Time
+  +end_time: Time
+  +location: String
+  +cost: Decimal
+  +latitude: Float
+  +longitude: Float
+  +is_booked: Boolean
+  +created_at: Timestamp
+}
+
+TripCollaborator: {
+  shape: class
+
+  +id: Integer [PK]
+  +trip_id: Integer [FK → Trip]
+  +user_id: Integer [FK → User]
+  +status: String
+  +created_at: Timestamp
+}
+
+Notification: {
+  shape: class
+
+  +id: Integer [PK]
+  +user_id: Integer [FK → User]
+  +trip_id: Integer [FK → Trip]
+  +type: String
+  +title: String
+  +message: Text
+  +link: String
+  +is_read: Boolean
+  +created_at: Timestamp
+}
+
+SavedAITip: {
+  shape: class
+
+  +id: Integer [PK]
+  +user_id: Integer [FK → User]
+  +title: String
+  +category: String
+  +content: Text
+  +icon: String
+  +tags: Array
+  +city: String
+  +created_at: Timestamp
+}
+
+# ─────────────────────────────────────────────
+#  LAYER 2 – BACKEND CONTROLLERS
+# ─────────────────────────────────────────────
+
+AuthController: {
+  shape: class
+
+  +register(req, res): void
+  +verifySignupOTP(req, res): void
+  +login(req, res): void
+  +forgotPassword(req, res): void
+  +verifyResetOTP(req, res): void
+  +resetPassword(req, res): void
+  +getProfile(req, res): void
+  +updateProfile(req, res): void
+  +uploadProfilePicture(req, res): void
+  +requestPasswordChange(req, res): void
+  +verifyPasswordChange(req, res): void
+  +requestAccountDeletion(req, res): void
+  +confirmAccountDeletion(req, res): void
+}
+
+TripController: {
+  shape: class
+
+  +getTrips(req, res): void
+  +createTrip(req, res): void
+  +updateTrip(req, res): void
+  +deleteTrip(req, res): void
+  +addCollaborator(req, res): void
+  +removeMember(req, res): void
+  +respondToInvite(req, res): void
+  +getTripMembers(req, res): void
+  +getItinerary(req, res): void
+  +addItineraryItem(req, res): void
+  +updateItineraryItem(req, res): void
+  +deleteItineraryItem(req, res): void
+  -checkTripAccess(userId, tripId): Boolean
+}
+
+ExpenseController: {
+  shape: class
+
+  +getExpenses(req, res): void
+  +createExpense(req, res): void
+  +updateExpense(req, res): void
+  +deleteExpense(req, res): void
+  +settleExpenseShare(req, res): void
+}
+
+AIController: {
+  shape: class
+
+  +predictTripCost(req, res): void
+  +getSeasonSuggestions(req, res): void
+  +getSmartTips(req, res): void
+  +getDestinationWeather(req, res): void
+  +getClimateRecommendations(req, res): void
+  +getTripAudit(req, res): void
+  +generateTripItinerary(req, res): void
+  +optimizeSchedule(req, res): void
+  +saveAITip(req, res): void
+  +getSavedAITips(req, res): void
+  +removeSavedAITip(req, res): void
+}
+
+NotificationController: {
+  shape: class
+
+  +getNotifications(req, res): void
+  +markAsRead(req, res): void
+  +markAllRead(req, res): void
+}
+
+DashboardController: {
+  shape: class
+
+  +getDashboardStats(req, res): void
+}
+
+TravelController: {
+  shape: class
+
+  +getTravelInfo(req, res): void
+}
+
+# ─────────────────────────────────────────────
+#  LAYER 3 – SERVICES
+# ─────────────────────────────────────────────
+
+EmailService: {
+  shape: class
+
+  +sendOTPEmail(to, otp, purpose): Promise
+  +sendWelcomeEmail(to, name): Promise
+  +sendTripCreatedEmail(to, trip, tips): Promise
+  +sendInvitationEmail(to, inviterName, destination): Promise
+}
+
+AIService: {
+  shape: class
+
+  +callGroqAPI(prompt, model): Promise
+  +callGeminiAPI(prompt): Promise
+  +parseAIResponse(raw): Object
+}
+
+# ─────────────────────────────────────────────
+#  LAYER 4 – MIDDLEWARE
+# ─────────────────────────────────────────────
+
+AuthMiddleware: {
+  shape: class
+
+  +verifyToken(req, res, next): void
+}
+
+UploadMiddleware: {
+  shape: class
+
+  +single(fieldName): Function
+  -storage: DiskStorage
+  -fileFilter(req, file, cb): void
+}
+
+# ─────────────────────────────────────────────
+#  LAYER 5 – FRONTEND PAGES
+# ─────────────────────────────────────────────
+
+IndexPage: {
+  shape: class
+  label: "index.html\n(Landing Page)"
+
+  +renderHero(): void
+  +playIntroAnimation(): void
+}
+
+LoginPage: {
+  shape: class
+  label: "login.html"
+
+  +handleLogin(): void
+  +showOTPVerification(): void
+}
+
+SignupPage: {
+  shape: class
+  label: "signup.html"
+
+  +handleRegister(): void
+  +verifyOTP(): void
+}
+
+DashboardPage: {
+  shape: class
+  label: "dashboard.html + app.js"
+
+  +loadDashboardStats(): void
+  +loadTrips(): void
+  +loadExpenses(): void
+  +loadNotifications(): void
+  +loadAITips(): void
+  +loadItinerary(): void
+  +loadSavedTips(): void
+  +handlePayNow(): void
+}
+
+PlannerPage: {
+  shape: class
+  label: "planner.js"
+
+  +generateAIItinerary(): void
+  +optimizeSchedule(): void
+  +renderDayCards(): void
+  +addManualItem(): void
+}
+
+CreateTripPage: {
+  shape: class
+  label: "create-trip.html"
+
+  +submitTripForm(): void
+  +inviteCollaborators(): void
+}
+
+ForgotPasswordPage: {
+  shape: class
+  label: "forgot-password.html"
+
+  +requestOTP(): void
+  +verifyOTP(): void
+  +resetPassword(): void
+}
+
+PremiumPage: {
+  shape: class
+  label: "premium.js"
+
+  +renderPremiumFeatures(): void
+  +handleUpgrade(): void
+}
+
+CurrencyService: {
+  shape: class
+  label: "currency_service.js"
+
+  +getExchangeRates(base): Promise
+  +convertAmount(amount, from, to): Number
+  +formatCurrency(amount, currency): String
+}
+
+# ═══════════════════════════════════════════════════════════
+#
+#  RELATIONSHIPS
+#
+# ═══════════════════════════════════════════════════════════
+
+# ── Database Associations ──
+
+User -> Trip: "owns (1..N)" {
+  style.stroke: "#4f8ef7"
+  target-arrowhead: {
+    shape: arrow
+  }
+}
+
+User -> Expense: "logs (1..N)" {
+  style.stroke: "#4f8ef7"
+  target-arrowhead: {
+    shape: arrow
+  }
+}
+
+User -> Expense: "pays (payer_id)" {
+  style.stroke: "#4f8ef7"
+  style.stroke-dash: 4
+}
+
+Trip -> Expense: "has (1..N)" {
+  style.stroke: "#f7a24f"
+  target-arrowhead: {
+    shape: arrow
+  }
+}
+
+Trip -> ItineraryItem: "has (1..N)" {
+  style.stroke: "#f7a24f"
+  target-arrowhead: {
+    shape: arrow
+  }
+}
+
+Trip -> TripCollaborator: "has (1..N)" {
+  style.stroke: "#f7a24f"
+  target-arrowhead: {
+    shape: arrow
+  }
+}
+
+User -> TripCollaborator: "joins as (1..N)" {
+  style.stroke: "#4f8ef7"
+  target-arrowhead: {
+    shape: arrow
+  }
+}
+
+User -> Notification: "receives (1..N)" {
+  style.stroke: "#4f8ef7"
+  target-arrowhead: {
+    shape: arrow
+  }
+}
+
+Trip -> Notification: "linked to" {
+  style.stroke: "#f7a24f"
+  style.stroke-dash: 4
+}
+
+User -> SavedAITip: "saves (1..N)" {
+  style.stroke: "#4f8ef7"
+  target-arrowhead: {
+    shape: arrow
+  }
+}
+
+PendingRegistration -> User: "promotes to" {
+  style.stroke: "#9b59b6"
+  style.stroke-dash: 4
+}
+
+# ── Controller → Model ──
+
+AuthController -> User: "CRUD" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+AuthController -> PendingRegistration: "manages" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+TripController -> Trip: "CRUD" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+TripController -> TripCollaborator: "manages" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+TripController -> ItineraryItem: "CRUD" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+TripController -> Notification: "creates" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+ExpenseController -> Expense: "CRUD" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+AIController -> SavedAITip: "CRUD" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+NotificationController -> Notification: "CRUD" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+# ── Controller → Service ──
+
+AuthController -> EmailService: "uses" {
+  style.stroke: "#e67e22"
+  style.stroke-dash: 5
+}
+
+TripController -> EmailService: "uses" {
+  style.stroke: "#e67e22"
+  style.stroke-dash: 5
+}
+
+AIController -> AIService: "uses" {
+  style.stroke: "#e67e22"
+  style.stroke-dash: 5
+}
+
+# ── Middleware wiring ──
+
+AuthMiddleware -> AuthController: "guards routes for" {
+  style.stroke: "#e74c3c"
+  style.stroke-dash: 5
+}
+
+AuthMiddleware -> TripController: "guards routes for" {
+  style.stroke: "#e74c3c"
+  style.stroke-dash: 5
+}
+
+AuthMiddleware -> ExpenseController: "guards routes for" {
+  style.stroke: "#e74c3c"
+  style.stroke-dash: 5
+}
+
+AuthMiddleware -> AIController: "guards routes for" {
+  style.stroke: "#e74c3c"
+  style.stroke-dash: 5
+}
+
+UploadMiddleware -> AuthController: "handles file upload for" {
+  style.stroke: "#e74c3c"
+  style.stroke-dash: 5
+}
+
+UploadMiddleware -> ExpenseController: "handles receipt upload for" {
+  style.stroke: "#e74c3c"
+  style.stroke-dash: 5
+}
+
+# ── Frontend → API (HTTP calls) ──
+
+LoginPage -> AuthController: "POST /api/auth/login" {
+  style.stroke: "#1abc9c"
+  style.stroke-dash: 7
+}
+
+SignupPage -> AuthController: "POST /api/auth/register\nPOST /api/auth/verify-signup-otp" {
+  style.stroke: "#1abc9c"
+  style.stroke-dash: 7
+}
+
+ForgotPasswordPage -> AuthController: "POST /api/auth/forgot-password\nPOST /api/auth/reset-password" {
+  style.stroke: "#1abc9c"
+  style.stroke-dash: 7
+}
+
+DashboardPage -> TripController: "GET/POST/PUT/DELETE /api/trips" {
+  style.stroke: "#1abc9c"
+  style.stroke-dash: 7
+}
+
+DashboardPage -> ExpenseController: "GET/POST/PUT/DELETE /api/expenses" {
+  style.stroke: "#1abc9c"
+  style.stroke-dash: 7
+}
+
+DashboardPage -> AIController: "GET /api/ai/tips\nGET /api/ai/audit" {
+  style.stroke: "#1abc9c"
+  style.stroke-dash: 7
+}
+
+DashboardPage -> NotificationController: "GET /api/notifications" {
+  style.stroke: "#1abc9c"
+  style.stroke-dash: 7
+}
+
+DashboardPage -> CurrencyService: "uses" {
+  style.stroke: "#8e44ad"
+  style.stroke-dash: 5
+}
+
+PlannerPage -> AIController: "POST /api/ai/itinerary\nPOST /api/ai/optimize-schedule" {
+  style.stroke: "#1abc9c"
+  style.stroke-dash: 7
+}
+
+CreateTripPage -> TripController: "POST /api/trips" {
+  style.stroke: "#1abc9c"
+  style.stroke-dash: 7
+}

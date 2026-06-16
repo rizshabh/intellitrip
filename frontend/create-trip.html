@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create New Trip | IntelliTrip</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="create-trip.css">
+  <link rel="stylesheet" href="intro-animation.css">
+  <style>
+    /* Premium Root Variables */
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --premium-accent: #57C1D3;
+      --premium-navy: #0B3B5B;
+    }
+
+    .shimmer {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    .route-node {
+      position: relative;
+      padding-left: 20px;
+      padding-bottom: 12px;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+
+    .route-node::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 8px;
+      height: 8px;
+      border: 2px solid var(--premium-accent);
+      background: white;
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    .route-node:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 12px;
+      width: 2px;
+      height: 100%;
+      background: rgba(87, 193, 211, 0.2);
+      z-index: 1;
+    }
+
+    .route-node.origin::before {
+      background: #10B981;
+      border-color: #10B981;
+    }
+
+    .route-node.destination::before {
+      background: #F43F5E;
+      border-color: #F43F5E;
+    }
+
+    .skeleton-breakdown {
+      display: none;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      overflow: hidden;
+      height: 100vh;
+      background: var(--gray-50);
+      margin: 0;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .create-trip-container {
+      padding: 0.5rem 2rem 1rem 2rem;
+      width: 100%;
+      height: calc(100vh - 80px);
+      /* Adjust based on top bar height */
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Autocomplete Styles */
+    .autocomplete-container {
+      position: relative;
+    }
+
+    .autocomplete-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .suggestion-item {
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #1a202c;
+      border-bottom: 1px solid #f7fafc;
+    }
+
+    .suggestion-item:hover {
+      background-color: #f7fafc;
+      color: #2b6cb0;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Notification/Warning Style */
+    .budget-warning {
+      background: #fff5f5;
+      border-left: 4px solid #f56565;
+      color: #c53030;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+
+    /* Custom Scrollbar for Cards */
+    .scrollable-card::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .scrollable-card::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    .scrollable-card::-webkit-scrollbar-thumb {
+      background: rgba(42, 143, 170, 0.4);
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+
+    .scrollable-card::-webkit-scrollbar-thumb:hover {
+      background: rgba(42, 143, 170, 0.6);
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+
+    .scrollable-card {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(42, 143, 170, 0.4) transparent;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(87, 193, 211, 0.4);
+      }
+
+      70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 10px rgba(87, 193, 211, 0);
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(87, 193, 211, 0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="logo-link">
+        <div class="logo">
+          <!-- Assuming logo.jpeg is in the same directory, if not adjusting path would be needed. Original dashboard had it. -->
+          <img src="logo.jpeg" alt="IntelliTrip" class="logo-img">
+          <span class="logo-text">IntelliTrip</span>
+        </div>
+      </a>
+      <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-link">
+        <div class="nav-icon">
+          <i class="fas fa-home"></i>
+        </div>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a href="dashboard.html#trips" class="nav-link">
+        <div class="nav-icon">
+          <i class="fas fa-suitcase"></i>
+        </div>
+        <span class="nav-text">My Trips</span>
+      </a>
+      <a href="dashboard.html#expenses" class="nav-link">
+        <div class="nav-icon">
+          <i class="fas fa-file-invoice-dollar"></i>
+        </div>
+        <span class="nav-text">Expenses</span>
+      </a>
+      <a href="dashboard.html#analytics" class="nav-link">
+        <div class="nav-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <span class="nav-text">Analytics</span>
+      </a>
+      <a href="dashboard.html#reports" class="nav-link">
+        <div class="nav-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <span class="nav-text">Reports</span>
+      </a>
+      <a href="dashboard.html#ai-tips" class="nav-link">
+        <div class="nav-icon">
+          <i class="fas fa-robot"></i>
+        </div>
+        <span class="nav-text">AI Tips</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <div class="user-avatar">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" alt="User Avatar">
+        </div>
+        <div class="user-info">
+          <p class="user-name">User Name</p>
+          <p class="user-email">user@intellitrip.com</p>
+        </div>
+        <button class="user-menu-btn">
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
+
+        <!-- Enhanced Dropdown Menu -->
+        <div class="user-menu-dropdown">
+          <ul>
+            <li><a href="#" class="dropdown-item"><i class="fas fa-user-circle"></i> My Profile</a></li>
+            <li><a href="#" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a></li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a href="#" class="dropdown-item text-danger" onclick="app.logout()"><i class="fas fa-sign-out-alt"></i>
+                Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <div class="page-title">
+          <h1>Create New Trip</h1>
+          <p class="page-subtitle">Plan your next adventure</p>
+        </div>
+      </div>
+
+      <div class="top-bar-right">
+        <a href="dashboard.html" class="btn-primary">
+          <i class="fas fa-columns"></i> Go to Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Create Trip Content -->
+    <div class="create-trip-container">
+      <div class="create-trip-grid"
+        style="display: grid; grid-template-columns: 1fr 420px; gap: 2rem; align-items: stretch; height: 100%; overflow: hidden;">
+        <!-- Left Column: Form -->
+        <div class="trip-form-card scrollable-card"
+          style="background: white; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 15px rgba(11, 59, 91, 0.04); border: 1px solid #B8E7ED; overflow-y: auto; height: 100%; position: relative; top: 0;">
+          <div class="form-header"
+            style="margin-bottom: 0.65rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #EDF2F7; padding-bottom: 0.5rem;">
+            <div>
+              <h2 style="font-size: 1.1rem; font-weight: 800; color: #0B3B5B; margin: 0;"><i class="fas fa-compass"
+                  style="color: #2A8FAA; margin-right: 0.3rem;"></i> Plan New Trip</h2>
+              <p style="color: #718096; font-weight: 500; font-size: 0.65rem; margin: 0;">Configure your itinerary
+                details</p>
+            </div>
+
+          </div>
+
+          <form id="tripForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem;">
+              <div class="form-group autocomplete-container" style="margin: 0;">
+                <label
+                  style="display: block; margin-bottom: 0.2rem; font-weight: 700; color: #0B3B5B; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.02em;">Starting
+                  From</label>
+                <input type="text" id="startingPoint" placeholder="City, Country" class="form-input" required
+                  style="width: 100%; padding: 0.45rem 0.65rem; border-radius: 8px; border: 2px solid #EDF2F7; background: #F7FAFC; font-weight: 600; font-size: 0.8rem; outline: none; height: 32px;"
+                  onfocus="this.style.borderColor='#2A8FAA'; this.style.background='white';">
+                <div id="startingSuggestions" class="autocomplete-suggestions"></div>
+              </div>
+
+              <div style="margin: 0;">
+                <label
+                  style="display: block; margin-bottom: 0.2rem; font-weight: 700; color: #0B3B5B; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.02em;">Destinations
+                  (The Route)</label>
+                <div id="destinationsList">
+                  <div class="destination-row"
+                    style="display: flex; gap: 0.4rem; margin-bottom: 0.4rem; position: relative;">
+                    <div class="autocomplete-container" style="flex: 1;">
+                      <input type="text" class="form-input destination-input" placeholder="Origin Stop" required
+                        style="width: 100%; padding: 0.45rem 0.65rem; border-radius: 8px; border: 2px solid #EDF2F7; background: #F7FAFC; font-weight: 600; font-size: 0.8rem; outline: none; height: 32px;"
+                        onfocus="this.style.borderColor='#2A8FAA'; this.style.background='white';">
+                      <div class="autocomplete-suggestions"></div>
+                    </div>
+                    <!-- First stop cannot be removed to maintain at least one destination -->
+                    <div style="width: 32px;"></div>
+                  </div>
+                </div>
+                <button type="button" id="addStopBtn"
+                  style="background: #E6F7F9; color: #2A8FAA; border: 1px dashed #2A8FAA; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.6rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 0.3rem;">
+                  <i class="fas fa-plus"></i> Add Destination Stop
+                </button>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.6rem;">
+              <label
+                style="display: block; margin-bottom: 0.2rem; font-weight: 700; color: #0B3B5B; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.02em;">Trip
+                Name</label>
+              <input type="text" id="tripName" placeholder="e.g. Rajasthan Adventure" class="form-input" required
+                style="width: 100%; padding: 0.45rem 0.65rem; border-radius: 8px; border: 2px solid #EDF2F7; background: #F7FAFC; font-weight: 600; font-size: 0.8rem; outline: none; height: 32px;"
+                onfocus="this.style.borderColor='#2A8FAA'; this.style.background='white';">
+            </div>
+
+            <div class="form-group"
+              style="margin-bottom: 0.6rem; background: #E6F7F9; padding: 0.5rem; border-radius: 10px; border: 1px dashed #2A8FAA;">
+              <label
+                style="display: block; margin-bottom: 0.2rem; font-weight: 700; color: #1A5F7A; font-size: 0.6rem; text-transform: uppercase;">Invite
+                Travel Buddies</label>
+              <input type="text" id="collaborators" placeholder="Emails (separated by commas)" class="form-input"
+                style="width: 100%; padding: 0.4rem 0.6rem; border-radius: 6px; border: 2px solid #B8E7ED; background: white; font-weight: 500; font-size: 0.75rem; outline: none; height: 28px;"
+                onfocus="this.style.borderColor='#2A8FAA'">
+            </div>
+
+            <div class="form-row"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem;">
+              <div class="form-group" style="margin: 0;">
+                <label
+                  style="display: block; margin-bottom: 0.2rem; font-weight: 700; color: #0B3B5B; font-size: 0.6rem; text-transform: uppercase;">Departure</label>
+                <input type="date" id="startDate" class="form-input" required
+                  style="width: 100%; padding: 0.4rem; border-radius: 8px; border: 2px solid #EDF2F7; background: #F7FAFC; font-weight: 600; font-size: 0.75rem; height: 32px;">
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label
+                  style="display: block; margin-bottom: 0.2rem; font-weight: 700; color: #0B3B5B; font-size: 0.6rem; text-transform: uppercase;">Return</label>
+                <input type="date" id="endDate" class="form-input" required
+                  style="width: 100%; padding: 0.4rem; border-radius: 8px; border: 2px solid #EDF2F7; background: #F7FAFC; font-weight: 600; font-size: 0.75rem; height: 32px;">
+              </div>
+            </div>
+
+            <div class="form-row"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.85rem;">
+              <div class="form-group" style="margin: 0;">
+                <label
+                  style="display: block; margin-bottom: 0.2rem; font-weight: 700; color: #0B3B5B; font-size: 0.6rem; text-transform: uppercase;">Total
+                  Budget</label>
+                <div style="position: relative;">
+                  <span id="currencyPrefix"
+                    style="position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%); font-weight: 800; color: #2A8FAA; font-size: 0.75rem; line-height: 1;">₹</span>
+                  <input type="number" id="budget" placeholder="0" class="form-input" required
+                    style="width: 100%; padding: 0.45rem 0.65rem 0.45rem 1.4rem; border-radius: 8px; border: 2px solid #EDF2F7; background: #F7FAFC; font-weight: 800; font-size: 0.9rem; outline: none; height: 32px;"
+                    onfocus="this.style.borderColor='#2A8FAA'; this.style.background='white';">
+                </div>
+
+              </div>
+
+              <div class="form-group" style="margin: 0;">
+                <label
+                  style="display: block; margin-bottom: 0.2rem; font-weight: 700; color: #0B3B5B; font-size: 0.6rem; text-transform: uppercase;">Travel
+                  Style</label>
+                <select id="travelStyle" class="form-input"
+                  style="width: 100%; padding: 0.4rem; border-radius: 8px; border: 2px solid #EDF2F7; background: #F7FAFC; font-weight: 600; font-size: 0.75rem; height: 32px; outline: none;">
+                  <option value="Economy">Economy</option>
+                  <option value="Balanced" selected>Balanced</option>
+                  <option value="Luxury">Luxury</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label
+                  style="display: block; margin-bottom: 0.2rem; font-weight: 700; color: #0B3B5B; font-size: 0.6rem; text-transform: uppercase;">Travelers</label>
+                <div
+                  style="display: flex; align-items: center; border: 2px solid #EDF2F7; border-radius: 8px; background: #F7FAFC; overflow: hidden; height: 32px;">
+                  <button type="button" id="decreaseMembers"
+                    style="width: 30px; height: 100%; background: none; border: none; cursor: pointer; color: #0B3B5B; font-size: 0.7rem;"><i
+                      class="fas fa-minus"></i></button>
+                  <input type="number" id="members" value="1" min="1" readonly
+                    style="flex: 1; border: none; background: none; text-align: center; font-weight: 800; font-size: 0.9rem; color: #0B3B5B;">
+                  <button type="button" id="increaseMembers"
+                    style="width: 30px; height: 100%; background: none; border: none; cursor: pointer; color: #0B3B5B; font-size: 0.7rem;"><i
+                      class="fas fa-plus"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button type="button" id="aiPredictBtn"
+                style="flex: 1; padding: 0.65rem; border-radius: 10px; font-weight: 800; font-size: 0.8rem; background: #1e293b; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; height: 38px;">
+                <i class="fas fa-magic"></i> AI Cost Prediction
+              </button>
+              <button type="submit"
+                style="flex: 1.5; padding: 0.65rem; border-radius: 10px; font-weight: 800; font-size: 0.9rem; background: linear-gradient(135deg, #0B3B5B 0%, #2A8FAA 100%); color: white; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(11, 59, 91, 0.15); transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; height: 38px;"
+                onmouseover="this.style.transform='translateY(-1px)'">
+                <i class="fas fa-rocket" style="font-size: 0.8rem;"></i> Launch My Trip
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right Column: Live Preview -->
+        <div class="trip-preview-card scrollable-card" id="previewCard"
+          style="background: linear-gradient(135deg, #0B3B5B 0%, #1A5F7A 100%); border-radius: 12px; padding: 1.25rem; color: white; box-shadow: 0 8px 20px rgba(11, 59, 91, 0.1); height: 100%; overflow-y: auto; transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; top: 0 !important; margin: 0;">
+          <!-- Content Overlay for better readability when image is present -->
+          <div id="previewOverlay"
+            style="position: absolute; inset: 0; background: rgba(11, 59, 91, 0.4); z-index: 0; display: none;"></div>
+
+          <div style="position: relative; z-index: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <span
+                style="background: rgba(42, 143, 170, 0.4); padding: 0.2rem 0.45rem; border-radius: 15px; font-size: 0.5rem; font-weight: 700; text-transform: uppercase;"><i
+                  class="fas fa-eye" style="margin-right: 0.2rem;"></i> Preview</span>
+              <div id="previewStyle"
+                style="font-size: 0.5rem; font-weight: 700; background:rgba(255,255,255,0.2); padding: 0.2rem 0.45rem; border-radius: 5px; color: #fff; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1);">
+                Balanced Style</div>
+            </div>
+
+            <h2 id="previewName"
+              style="font-size: 1.2rem; font-weight: 800; margin: 0; line-height: 1; letter-spacing: -0.02em;">Draft
+              Trip
+            </h2>
+            <p id="previewDestination"
+              style="margin: 0.2rem 0 0.6rem 0; font-size: 0.8rem; opacity: 0.8; font-weight: 500;"><i
+                class="fas fa-map-marker-alt" style="margin-right: 0.25rem; color: #57C1D3;"></i> Destination</p>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 0.4rem; margin-bottom: 0.6rem;">
+              <div
+                style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0.45rem 0.6rem; display: flex; align-items: center; gap: 0.6rem;">
+                <i class="fas fa-calendar-alt" style="font-size: 0.7rem; color: #57C1D3;"></i>
+                <div>
+                  <span
+                    style="display: block; font-size: 0.5rem; opacity: 0.6; font-weight: 700; text-transform: uppercase;">Duration</span>
+                  <span id="previewDuration" style="font-weight: 700; font-size: 0.75rem;">- Days</span>
+                </div>
+              </div>
+              <div
+                style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0.45rem 0.6rem; display: flex; align-items: center; gap: 0.6rem;">
+                <i class="fas fa-users" style="font-size: 0.7rem; color: #57C1D3;"></i>
+                <div>
+                  <span
+                    style="display: block; font-size: 0.5rem; opacity: 0.6; font-weight: 700; text-transform: uppercase;">Members</span>
+                  <span id="previewMembers" style="font-weight: 700; font-size: 0.75rem;">1 Pax</span>
+                </div>
+              </div>
+              <div
+                style="background: rgba(87, 193, 211, 0.15); border-radius: 8px; padding: 0.45rem 0.6rem; display: flex; align-items: center; gap: 0.6rem; border: 1px solid rgba(87, 193, 211, 0.1);">
+                <i class="fas fa-wallet" style="font-size: 0.7rem; color: #FFD700;"></i>
+                <div>
+                  <span
+                    style="display: block; font-size: 0.5rem; color: #FFD700; font-weight: 800; text-transform: uppercase;">Per
+                    Person</span>
+                  <span id="previewPerPerson" style="font-weight: 800; font-size: 0.9rem;">-</span>
+                </div>
+              </div>
+            </div>
+
+            <div id="budgetIndicator"
+              style="display: none; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; margin: 1.2rem 0 0.5rem 0.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+              <i class="fas fa-leaf"></i> Economy
+            </div>
+
+            <div id="previewBudgetMeter"
+              style="display: none; background: rgba(0,0,0,0.25); padding: 0.5rem; border-radius: 8px; margin-bottom: 0.4rem; border: 1px solid rgba(255,255,255,0.1);">
+              <div style="height: 5px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                <div id="budgetMeterFill" style="width: 0%; height: 100%; transition: 0.5s ease; background: #57C1D3;">
+                </div>
+              </div>
+            </div>
+
+            <div
+              style="background: rgba(255,255,255,0.08); border-radius: 8px; padding: 0.55rem; border: 1px solid rgba(255,255,255,0.05);">
+              <!-- Route Timeline -->
+              <div id="routeTimeline" style="margin-bottom: 0.6rem; display: none;">
+                <div
+                  style="font-size: 0.5rem; text-transform: uppercase; font-weight: 800; opacity: 0.6; margin-bottom: 0.4rem; color: #57C1D3;">
+                  Journey Roadmap</div>
+                <div id="timelineContainer"></div>
+              </div>
+
+              <!-- Skeleton Breakdown -->
+              <div id="aiSkeleton" class="skeleton-breakdown">
+                <div style="font-size: 0.55rem; font-weight: 800; color: #FFD700; margin-bottom: 0.4rem;">AI is
+                  crunching
+                  real-time travel data...</div>
+                <div class="shimmer" style="height: 12px; border-radius: 4px; margin-bottom: 0.3rem; width: 80%;"></div>
+                <div class="shimmer" style="height: 12px; border-radius: 4px; margin-bottom: 0.3rem; width: 90%;"></div>
+                <div class="shimmer" style="height: 12px; border-radius: 4px; width: 60%;"></div>
+              </div>
+
+              <div id="aiBreakdown"
+                style="display: none; margin-top: 0.6rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.6rem;">
+                <!-- Header -->
+                <div style="display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.4rem; color: #FFD700;">
+                  <i class="fas fa-chart-pie" style="font-size: 0.6rem;"></i>
+                  <span
+                    style="font-size: 0.55rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">AI
+                    Predicted Breakdown</span>
+                </div>
+
+                <!-- Cost Grid -->
+                <div
+                  style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; font-size: 0.6rem; font-weight: 600; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; margin-bottom: 0.6rem;">
+                  <span style="opacity: 0.7;">🏨 Accommodation:</span> <span id="bd-acc"
+                    style="text-align: right; color: #57C1D3;">-</span>
+                  <span style="opacity: 0.7;">🍱 Food & Dining:</span> <span id="bd-food"
+                    style="text-align: right; color: #57C1D3;">-</span>
+                  <span style="opacity: 0.7;">🎟️ Activities:</span> <span id="bd-act"
+                    style="text-align: right; color: #57C1D3;">-</span>
+                  <span style="opacity: 0.7;">🚕 Transport:</span> <span id="bd-trans"
+                    style="text-align: right; color: #57C1D3;">-</span>
+                  <div
+                    style="grid-column: span 2; border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 0.2rem; padding-top: 0.2rem; display: flex; justify-content: space-between; font-weight: 800; font-size: 0.7rem; color: #FFD700;">
+                    <span>TOTAL ESTIMATE</span>
+                    <span id="bd-total">-</span>
+                  </div>
+                </div>
+
+                <!-- AI Insights Text -->
+                <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.25rem;">
+                  <i class="fas fa-robot" style="font-size: 0.65rem; color: #57C1D3;"></i>
+                  <span
+                    style="font-weight: 800; font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.05em; color: #57C1D3;">AI
+                    Pathing Advice</span>
+                </div>
+                <p id="previewTipText"
+                  style="margin: 0; font-size: 0.65rem; line-height: 1.4; font-weight: 500; opacity: 0.9; color: #E2E8F0;">
+                  Provide destination details for expert AI pathing advice.
+                </p>
+                <div id="lowBudgetWarning" class="budget-warning" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </main>
+
+
+  <script src="currency_service.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // DOM Elements
+    const form = document.getElementById('tripForm');
+    const membersInput = document.getElementById('members');
+    const tripNameInput = document.getElementById('tripName');
+    const startingPointInput = document.getElementById('startingPoint');
+    const destinationsList = document.getElementById('destinationsList');
+    const addStopBtn = document.getElementById('addStopBtn');
+    const budgetInput = document.getElementById('budget');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const travelStyleInput = document.getElementById('travelStyle');
+    const aiPredictBtn = document.getElementById('aiPredictBtn');
+
+    // Preview Elements
+    const previewName = document.getElementById('previewName');
+    const previewDestination = document.getElementById('previewDestination');
+    const previewDuration = document.getElementById('previewDuration');
+    const previewMembers = document.getElementById('previewMembers');
+    const previewPerPerson = document.getElementById('previewPerPerson');
+
+    // Member Counter Logic
+    document.getElementById('increaseMembers').addEventListener('click', () => {
+      membersInput.value = parseInt(membersInput.value) + 1;
+      updatePreview();
+    });
+
+    document.getElementById('decreaseMembers').addEventListener('click', () => {
+      if (parseInt(membersInput.value) > 1) {
+        membersInput.value = parseInt(membersInput.value) - 1;
+        updatePreview();
+      }
+    });
+
+    // Live Preview Updates
+    [tripNameInput, startingPointInput, budgetInput, startDateInput, endDateInput, membersInput].forEach(input => {
+      input.addEventListener('input', updatePreview);
+    });
+
+    // Select should trigger on 'change'
+    travelStyleInput.addEventListener('change', () => {
+      updatePreview();
+      // Visual cue that prediction needs refresh
+      const predictBtn = document.getElementById('aiPredictBtn');
+      predictBtn.style.animation = 'pulse 1.5s infinite';
+      setTimeout(() => predictBtn.style.animation = 'none', 3000);
+    });
+
+    // Initialize currency symbol and check backend health
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Currency Sync
+      setTimeout(() => {
+        if (window.app) {
+          const symbol = window.app.getCurrencySymbol();
+          const prefix = document.getElementById('currencyPrefix');
+          if (prefix) prefix.textContent = symbol;
+        }
+      }, 500);
+
+      // 2. Backend Health Check
+      const healthUrl = window.app ? window.app.getApiUrl('/api/ai/health') : 'http://localhost:5000/api/ai/health';
+      try {
+        console.log('🔍 Checking backend health at:', healthUrl);
+        const res = await fetch(healthUrl);
+        if (res.ok) console.log('✅ Backend is reachable');
+        else console.warn('⚠️  Backend health check failed:', res.status);
+      } catch (err) {
+        console.error('❌ Backend is unreachable:', err.message);
+      }
+    });
+
+    function updatePreview() {
+      const symbol = window.app ? window.app.getCurrencySymbol() : '₹';
+      // Name
+      previewName.textContent = tripNameInput.value || 'Draft Trip';
+
+      // Destination
+      const destInputs = document.querySelectorAll('.destination-input');
+      const destValues = Array.from(destInputs).map(i => i.value.trim()).filter(v => v);
+      const destText = destValues.length > 0 ? destValues.join(' → ') : 'Destination';
+      previewDestination.innerHTML = `<i class="fas fa-map-marker-alt" style="margin-right: 0.25rem; color: #57C1D3;"></i> ${destText}`;
+
+      const firstDest = destValues[0] || 'this destination';
+
+      // Style
+      const style = travelStyleInput.value;
+      const styleBadge = document.getElementById('previewStyle');
+      if (styleBadge) {
+        styleBadge.textContent = style + ' Style';
+        // Color coding for style
+        if (style === 'Luxury') styleBadge.style.background = 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)';
+        else if (style === 'Balanced') styleBadge.style.background = 'rgba(42, 143, 170, 0.6)';
+        else styleBadge.style.background = 'rgba(16, 185, 129, 0.6)';
+      }
+
+      // Members
+      const count = parseInt(membersInput.value) || 1;
+      previewMembers.textContent = `${count} px`;
+
+      // Duration
+      let diffDays = 0;
+      if (startDateInput.value && endDateInput.value) {
+        const start = new Date(startDateInput.value);
+        const end = new Date(endDateInput.value);
+        const diffTime = Math.abs(end - start);
+        diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        if (!isNaN(diffDays) && diffDays > 0) {
+          previewDuration.textContent = `${diffDays} Days`;
+        } else {
+          previewDuration.textContent = '- Days';
+        }
+      } else {
+        previewDuration.textContent = '- Days';
+      }
+
+      // Per Person & Budget Meter
+      const budget = parseFloat(budgetInput.value) || 0;
+      const budgetMeter = document.getElementById('previewBudgetMeter');
+      const budgetMeterFill = document.getElementById('budgetMeterFill');
+      const tipText = document.getElementById('previewTipText');
+      const budgetIndicator = document.getElementById('budgetIndicator');
+
+      if (budget > 0 && count > 0) {
+        const perPerson = (budget / count).toFixed(0);
+        previewPerPerson.textContent = window.app ? window.app.formatCurrency(perPerson) : `₹${perPerson}`;
+        budgetMeter.style.display = 'block';
+        if (budgetIndicator) {
+          budgetIndicator.style.display = 'flex';
+          budgetIndicator.style.padding = '4px 10px';
+          budgetIndicator.style.borderRadius = '6px';
+          budgetIndicator.style.background = 'rgba(255,255,255,0.05)';
+          budgetIndicator.style.width = 'fit-content';
+        }
+
+        const perDay = perPerson / (diffDays || 1);
+        const isINR = symbol === '₹';
+        const lowThreshold = isINR ? 400 : 5;
+
+        if (perDay < lowThreshold * 3) {
+          if (budgetIndicator) {
+            budgetIndicator.innerHTML = '<i class="fas fa-leaf" style="font-size:0.8em; margin-right:4px;"></i> Economy Budget';
+            budgetIndicator.style.color = '#34D399'; // Brighter green for dark bg
+          }
+          budgetMeterFill.style.width = '30%';
+          budgetMeterFill.style.background = '#34D399';
+
+          if (perDay < lowThreshold) {
+            if (budgetIndicator) {
+              budgetIndicator.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size:0.8em; margin-right:4px;"></i> Extremely Low Budget';
+              budgetIndicator.style.color = '#F87171'; // Brighter red
+            }
+            budgetMeterFill.style.width = '10%';
+            budgetMeterFill.style.background = '#F87171';
+            tipText.innerHTML = `<span style="color: #F87171; font-weight: 700;">Note: Budget looks very tight for ${firstDest}.</span>`;
+          } else {
+            tipText.textContent = "Budget-friendly plan looks good!";
+          }
+        } else if (perDay < (isINR ? 5000 : 70)) {
+          if (budgetIndicator) {
+            budgetIndicator.innerHTML = '<i class="fas fa-balance-scale" style="font-size:0.8em; margin-right:4px;"></i> Balanced Budget';
+            budgetIndicator.style.color = '#60A5FA'; // Brighter blue
+          }
+          budgetMeterFill.style.width = '60%';
+          budgetMeterFill.style.background = '#60A5FA';
+          tipText.textContent = "Your budget is well-balanced.";
+        } else {
+          if (budgetIndicator) {
+            budgetIndicator.innerHTML = '<i class="fas fa-crown" style="font-size:0.8em; margin-right:4px;"></i> Premium Budget';
+            budgetIndicator.style.color = '#FBBF24'; // Brighter gold
+          }
+          budgetMeterFill.style.width = '90%';
+          budgetMeterFill.style.background = '#FBBF24';
+          tipText.textContent = "Premium experience budget.";
+        }
+      } else {
+        budgetMeter.style.display = 'none';
+        previewPerPerson.textContent = '-';
+        if (budgetIndicator) budgetIndicator.style.display = 'none';
+      }
+
+      // Dynamic Image & Weather Preview Logic
+      if (window.app && firstDest && firstDest !== 'this destination' && firstDest.length > 2) {
+        if (window.lastPreviewDest !== firstDest) {
+          window.lastPreviewDest = firstDest;
+          clearTimeout(window.previewTimeout);
+          window.previewTimeout = setTimeout(async () => {
+            try {
+              const [img, weather] = await Promise.all([
+                app.getDestinationImage(firstDest),
+                app.getDestinationWeather(firstDest)
+              ]);
+
+              const card = document.getElementById('previewCard');
+              const overlay = document.getElementById('previewOverlay');
+              if (card) {
+                card.style.background = `url('${img}') center/cover no-repeat`;
+                if (overlay) overlay.style.display = 'block';
+              }
+
+              if (weather && weather.temp !== '--') {
+                const styleBadge = document.getElementById('previewStyle');
+                if (styleBadge) {
+                  const styleTxt = travelStyleInput.value + ' Style';
+                  styleBadge.innerHTML = `<span style="opacity:0.8;">${styleTxt}</span> <span style="margin:0 6px; opacity:0.5;">|</span> <i class="fas fa-sun" style="color:#FFD700;"></i> ${weather.temp}°C`;
+                }
+              }
+            } catch (e) {
+              console.warn('Preview enhancement failed', e);
+            }
+          }, 800);
+        }
+      } else if (!firstDest || firstDest === 'this destination') {
+        const card = document.getElementById('previewCard');
+        const overlay = document.getElementById('previewOverlay');
+        if (card) {
+          card.style.background = 'linear-gradient(135deg, #0B3B5B 0%, #1A5F7A 100%)';
+          if (overlay) overlay.style.display = 'none';
+        }
+      }
+
+      // Update Route Timeline
+      const timeline = document.getElementById('timelineContainer');
+      const timelineWrap = document.getElementById('routeTimeline');
+      timeline.innerHTML = '';
+
+      const allStops = [];
+      const startPoint = startingPointInput.value.trim();
+      if (startPoint) allStops.push({ name: startPoint, type: 'origin' });
+      destValues.forEach((v, i) => allStops.push({ name: v, type: i === destValues.length - 1 ? 'destination' : 'pitstop' }));
+
+      if (allStops.length > 0) {
+        timelineWrap.style.display = 'block';
+        allStops.forEach(stop => {
+          const div = document.createElement('div');
+          div.className = `route-node ${stop.type}`;
+          div.textContent = stop.name;
+          timeline.appendChild(div);
+        });
+      } else {
+        timelineWrap.style.display = 'none';
+      }
+    }
+
+    // Dynamic Date Validation
+    startDateInput.addEventListener('change', () => {
+      const start = startDateInput.value;
+      if (start) {
+        endDateInput.min = start; // Return date cannot be before Departure
+
+        // Auto-correct end date if it was previously set earlier than new start date
+        if (endDateInput.value && endDateInput.value < start) {
+          endDateInput.value = start;
+          updatePreview();
+        }
+      }
+    });
+
+    // Form Submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const tripData = {
+        name: tripNameInput.value.trim(),
+        starting_point: startingPointInput.value.trim(),
+        destination: Array.from(document.querySelectorAll('.destination-input'))
+          .map(i => i.value.trim())
+          .filter(v => v)
+          .join(' → '),
+        startDate: startDateInput.value,
+        endDate: endDateInput.value,
+        members: parseInt(membersInput.value),
+        budget: parseInt(budgetInput.value),
+        collaborators: document.getElementById('collaborators').value,
+        travelers: parseInt(membersInput.value),
+        travel_style: travelStyleInput.value
+      };
+
+      if (!tripData.name || !tripData.destination || !tripData.startDate || !tripData.endDate) {
+        if (window.app) app.showToast("Please fill all required fields", "warning");
+        return;
+      }
+
+      if (new Date(tripData.endDate) < new Date(tripData.startDate)) {
+        if (window.app) app.showToast("Return date cannot be before Departure date", "error");
+        return;
+      }
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Launching...';
+      submitBtn.disabled = true;
+
+      try {
+        if (window.app && window.app.createTrip) {
+          await app.createTrip(tripData);
+        }
+      } catch (err) {
+        console.error(err);
+        if (window.app) app.showToast("Error creating trip. Please try again.", "error");
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Location Autocomplete with Nominatim
+    function setupAutocomplete(input, suggestionList) {
+      let debounceTimer;
+      input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const query = input.value.trim();
+        if (query.length < 3) {
+          suggestionList.style.display = 'none';
+          return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+            const data = await res.json();
+            suggestionList.innerHTML = '';
+            if (data.length > 0) {
+              data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.textContent = item.display_name;
+                div.onclick = () => {
+                  input.value = item.display_name;
+                  suggestionList.style.display = 'none';
+                  updatePreview();
+                };
+                suggestionList.appendChild(div);
+              });
+              suggestionList.style.display = 'block';
+            } else {
+              suggestionList.style.display = 'none';
+            }
+          } catch (err) {
+            console.error('Autocomplete error:', err);
+          }
+        }, 300);
+      });
+    }
+
+    // Handle Multi-Stop Destinatioms
+    function createDestinationRow() {
+      const stops = document.querySelectorAll('.destination-row').length + 1;
+      const row = document.createElement('div');
+      row.className = 'destination-row';
+      row.style.cssText = 'display: flex; gap: 0.4rem; margin-bottom: 0.4rem; position: relative; animation: slideIn 0.3s ease-out;';
+
+      row.innerHTML = `
+        <div class="autocomplete-container" style="flex: 1;">
+          <input type="text" class="form-input destination-input" placeholder="Next Stop" required
+            style="width: 100%; padding: 0.45rem 0.65rem; border-radius: 8px; border: 2px solid #EDF2F7; background: #F7FAFC; font-weight: 600; font-size: 0.8rem; outline: none; height: 32px;"
+            onfocus="this.style.borderColor='#2A8FAA'; this.style.background='white';">
+          <div class="autocomplete-suggestions"></div>
+        </div>
+        <button type="button" class="remove-stop-btn" style="background: #FEE2E2; color: #EF4444; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+
+      const input = row.querySelector('.destination-input');
+      const suggestions = row.querySelector('.autocomplete-suggestions');
+      const removeBtn = row.querySelector('.remove-stop-btn');
+
+      setupAutocomplete(input, suggestions);
+      input.addEventListener('input', updatePreview);
+
+      removeBtn.addEventListener('click', () => {
+        row.remove();
+        updatePreview();
+      });
+
+      destinationsList.appendChild(row);
+      input.focus();
+    }
+
+    addStopBtn.addEventListener('click', createDestinationRow);
+
+    // Initial setup for the first row
+    const firstDestInput = document.querySelector('.destination-input');
+    const firstDestSuggestions = document.querySelector('.destination-row .autocomplete-suggestions');
+    if (firstDestInput && firstDestSuggestions) {
+      setupAutocomplete(firstDestInput, firstDestSuggestions);
+      firstDestInput.addEventListener('input', updatePreview);
+    }
+
+    setupAutocomplete(startingPointInput, document.getElementById('startingSuggestions'));
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+      document.querySelectorAll('.autocomplete-suggestions').forEach(list => {
+        if (!list.parentElement.contains(e.target)) {
+          list.style.display = 'none';
+        }
+      });
+    });
+
+    // Real-time Preview Listeners
+    [tripNameInput, startingPointInput, budgetInput, travelStyleInput].forEach(el => {
+      if (el) el.addEventListener('input', updatePreview);
+    });
+    // For selects/numbers that might use change instead of input in some browsers
+    [travelStyleInput, membersInput, startDateInput, endDateInput].forEach(el => {
+      if (el) el.addEventListener('change', updatePreview);
+    });
+
+    // Member button listeners (they might not trigger input/change on the read-only field)
+    document.getElementById('increaseMembers').addEventListener('click', () => {
+      membersInput.value = parseInt(membersInput.value) + 1;
+      updatePreview();
+    });
+    document.getElementById('decreaseMembers').addEventListener('click', () => {
+      if (parseInt(membersInput.value) > 1) {
+        membersInput.value = parseInt(membersInput.value) - 1;
+        updatePreview();
+      }
+    });
+
+    // Run initial preview
+    updatePreview();
+
+    // AI Cost Prediction
+    aiPredictBtn.addEventListener('click', async () => {
+      const destValues = Array.from(document.querySelectorAll('.destination-input'))
+        .map(i => i.value.trim())
+        .filter(v => v);
+      const destination = destValues.join(' → ');
+
+      const starting_point = startingPointInput.value.trim();
+      const members = parseInt(membersInput.value);
+      const style = travelStyleInput.value;
+      const budget = parseInt(budgetInput.value) || 0;
+
+      let diffDays = 0;
+      if (startDateInput.value && endDateInput.value) {
+        const start = new Date(startDateInput.value);
+        const end = new Date(endDateInput.value);
+        const diffTime = Math.abs(end - start);
+        diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      }
+
+      if (destValues.length === 0 || diffDays <= 0) {
+        if (window.app) app.showToast("Please enter at least one destination and valid dates first", "warning");
+        return;
+      }
+
+      const originalText = aiPredictBtn.innerHTML;
+      aiPredictBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+      aiPredictBtn.disabled = true;
+
+      // Show Skeleton
+      document.getElementById('aiBreakdown').style.display = 'none';
+      document.getElementById('aiSkeleton').style.display = 'block';
+
+      // Reset Warnings
+      const warnBox = document.getElementById('lowBudgetWarning');
+      warnBox.style.display = 'none';
+
+      try {
+        const token = localStorage.getItem('token');
+        const apiUrl = window.app ? window.app.getApiUrl('/api/ai/predict-cost') : 'http://localhost:5000/api/ai/predict-cost';
+
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({
+            destination,
+            starting_point,
+            days: diffDays,
+            travelers: members,
+            style,
+            budget
+          })
+        });
+
+        // Hide Skeleton
+        document.getElementById('aiSkeleton').style.display = 'none';
+
+        // Check if response is JSON
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await res.text();
+          console.error("Non-JSON Response received:", text.substring(0, 500));
+          throw new Error(`Server connection error (${res.status}). Tried to reach: ${res.url}`);
+        }
+
+        const data = await res.json();
+        if (res.ok) {
+          // Update Preview with AI Data
+          document.getElementById('aiBreakdown').style.display = 'block';
+
+          const symbol = window.app ? window.app.getCurrencySymbol() : '₹';
+          const formatAmt = (val) => window.app ? window.app.formatCurrency(val) : `₹${val}`;
+
+          document.getElementById('bd-acc').textContent = formatAmt(data.breakdown.accommodation);
+          document.getElementById('bd-food').textContent = formatAmt(data.breakdown.food);
+          document.getElementById('bd-act').textContent = formatAmt(data.breakdown.activities);
+          document.getElementById('bd-trans').textContent = formatAmt(data.breakdown.transport);
+          document.getElementById('bd-total').textContent = formatAmt(data.estimated_cost);
+          document.getElementById('previewTipText').textContent = data.advice || 'AI breakdown ready!';
+
+          // Handle Low Budget Warning from AI
+          if (data.warning) {
+            warnBox.textContent = data.warning;
+            warnBox.style.display = 'block';
+            if (window.app) app.showToast("Budget analysis: Very Tight", "warning");
+          } else {
+            if (window.app) app.showToast("AI Prediction matches your " + style + " style!", "success");
+          }
+        } else {
+          throw new Error(data.message || "AI Prediction failed");
+        }
+      } catch (err) {
+        console.error(err);
+        if (window.app) app.showToast(err.message || "AI Service unavailable", "error");
+      } finally {
+        aiPredictBtn.innerHTML = originalText;
+        aiPredictBtn.disabled = false;
+      }
+    });
+
+    // Initial Preview
+    updatePreview();
+  </script>
+</body>
+
+</html>

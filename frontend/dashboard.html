@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliTrip - Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css?v=12">
+    <link rel="stylesheet" href="premium.css?v=2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo-link">
+                <div class="logo">
+                    <img src="logo.jpeg" alt="IntelliTrip" class="logo-img">
+                    <span class="logo-text">IntelliTrip</span>
+                </div>
+            </a>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-link active" data-view="dashboard">
+                <div class="nav-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="#" class="nav-link" data-view="trips">
+                <div class="nav-icon">
+                    <i class="fas fa-suitcase"></i>
+                </div>
+                <span class="nav-text">My Trips</span>
+            </a>
+            <a href="#" class="nav-link" data-view="expenses">
+                <div class="nav-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <span class="nav-text">Expenses</span>
+            </a>
+            <a href="#" class="nav-link" data-view="analytics">
+                <div class="nav-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <span class="nav-text">Analytics</span>
+            </a>
+            <a href="#" class="nav-link" data-view="reports">
+                <div class="nav-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <span class="nav-text">Reports</span>
+            </a>
+            <a href="#" class="nav-link" id="aiTipsLink">
+                <div class="nav-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <span class="nav-text">AI Tips</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar" style="position:relative; overflow:visible;">
+                    <img id="dashboardAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=John"
+                        alt="User Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                    <label for="avatarUpload"
+                        style="position:absolute; bottom:0; right:0; background:var(--primary, #2a8faa); color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+                        <i class="fas fa-camera" style="font-size:12px;"></i>
+                    </label>
+                    <input type="file" id="avatarUpload" accept="image/*" style="display:none;"
+                        onchange="uploadProfilePicture(this)">
+                </div>
+                <div class="user-info">
+                    <p class="user-name">User Name</p>
+                    <p class="user-email">user@intellitrip.com</p>
+                </div>
+                <button class="user-menu-btn">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+
+                <!-- Enhanced Dropdown Menu -->
+                <div class="user-menu-dropdown">
+                    <ul>
+                        <li><a href="#" class="dropdown-item" onclick="app.showView('profile')"><i
+                                    class="fas fa-user-circle"></i> My Profile</a></li>
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a href="#" class="dropdown-item text-danger" onclick="app.logout()"><i
+                                    class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active')"></div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="mobile-menu-btn" id="mobileMenuBtn"
+                    style="display: none; background: none; border: none; font-size: 1.25rem; color: #1e293b; cursor: pointer; margin-right: 1rem;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h1 id="currentPageTitle">Dashboard</h1>
+                </div>
+            </div>
+
+            <div class="top-bar-right" style="position: relative;">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search trips, expenses..." class="search-input" id="globalSearch">
+                    <button class="search-clear" id="clearSearchBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Notifications Dropdown (Aligned below search bar as requested) -->
+                <div class="notifications-dropdown" id="notificationsDropdown" aria-hidden="true"
+                    style="left: 0 !important; right: auto !important; width: 400px !important; top: 100% !important; margin-top: 10px !important; transform: none !important;">
+                    <div class="dropdown-header">
+                        <h3>Notifications</h3>
+                        <button class="btn-link" onclick="app.markAllNotificationsRead()"
+                            style="white-space: nowrap !important; margin-left: 10px;">Mark all as read</button>
+                    </div>
+                    <div class="notifications-list">
+                        <!-- Notifications will load here -->
+                    </div>
+                </div>
+
+                <div class="top-bar-actions">
+                    <button class="icon-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="navNotificationCount">0</span>
+                    </button>
+
+                    <a href="create-trip.html" class="btn-primary">
+                        <i class="fas fa-plus"></i> New Trip
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="view active">
+            <!-- Welcome Hero -->
+            <div class="page-header welcome-hero">
+                <div class="hero-slideshow">
+                    <div class="hero-slide active"
+                        style="background-image: url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                    <div class="hero-slide"
+                        style="background-image: url('https://images.unsplash.com/photo-1504964148243-d75dc99caad7?auto=format&fit=crop&w=1200&q=80')">
+                    </div>
+                </div>
+                <div class="hero-overlay"></div>
+                <div class="hero-time" id="heroTime"></div>
+                <div class="header-content">
+                    <h1 id="greeting">Good Morning</h1>
+                    <p id="heroMessage">Loading travel status...</p>
+                    <div id="heroStatusPill" style="margin-top: 1.5rem;"></div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-suitcase"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-value" data-stat="trips">0</h3>
+                        <p class="stat-label">Total Trips</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-value" data-stat="spent">0</h3>
+                        <p class="stat-label">Total Spent</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-value" data-stat="savings">0</h3>
+                        <p class="stat-label">Total Savings</p>
+                        <div class="stat-trend positive">
+                            <i class="fas fa-arrow-up"></i> (Budget - Spent)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="dashboard-grid">
+                <!-- Upcoming Trips -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-calendar-alt"></i> Upcoming Trips</h2>
+                        <a href="#" class="btn-link" onclick="showView('trips')">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="trips-list" id="upcomingTripsList">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expense Breakdown -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-pie"></i> Expense Breakdown</h2>
+                        <select class="select-period" style="display:none;"> <!-- Hidden for now -->
+                            <option>All Time</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div class="expense-chart" id="expenseChart">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="create-trip.html" class="action-btn">
+                                <div class="action-icon">
+                                    <i class="fas fa-plus-circle"></i>
+                                </div>
+                                <span class="action-text">Create Trip</span>
+                                <p class="action-desc">Plan a new journey</p>
+                            </a>
+                            <button class="action-btn" onclick="app.showView('expenses')">
+                                <div class="action-icon">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </div>
+                                <span class="action-text">Add Expense</span>
+                                <p class="action-desc">Record travel cost</p>
+                            </button>
+                            <button class="action-btn" onclick="app.showView('analytics')">
+                                <div class="action-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <span class="action-text">Analytics</span>
+                                <p class="action-desc">View insights</p>
+                            </button>
+                            <button class="action-btn" onclick="app.openCurrencyConverter()">
+                                <div class="action-icon">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <span class="action-text">Exchange Hub</span>
+                                <p class="action-desc">Live conversion</p>
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-list" id="activityList">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Smart Tips (Static for now, could be dynamic later) -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-robot"></i> AI Smart Tips</h2>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <a href="#" class="btn-link" onclick="app.openAITips()">
+                                View All <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="ai-tips-container">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spending Trend -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line"></i> Spending Trend</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="trend-chart" id="trendChart">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Views -->
+        <div id="tripsView" class="view">
+            <div class="page-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-suitcase"></i> My Trips</h1>
+                    <p>Manage all your travel plans and upcoming journeys</p>
+                </div>
+                <a href="create-trip.html" class="btn-primary btn-lg">
+                    <i class="fas fa-plus"></i> Create New Trip
+                </a>
+            </div>
+
+            <div class="content-container">
+                <!-- Trip Filters -->
+                <div class="filters-section">
+                    <div class="filter-options">
+                        <select class="filter-select" id="tripStatusFilter">
+                            <option value="all">All Status</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="ongoing">Ongoing</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <input type="text" id="tripSearchInput" class="search-trips"
+                            placeholder="Search trips by destination...">
+                    </div>
+                </div>
+
+                <!-- Trips Grid -->
+                <div class="trips-grid" id="tripsGrid">
+                    <!-- Trips will load here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="expensesView" class="view">
+            <div class="page-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-file-invoice-dollar"></i> Expenses</h1>
+                    <p>Track and manage all your travel expenses efficiently</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-primary" onclick="app.showAddExpenseModal()">
+                        <i class="fas fa-plus"></i> Add Expense
+                    </button>
+                </div>
+            </div>
+
+            <!-- Debt Intelligence Hub (SMART SETTLEMENT) -->
+            <div id="debtSettlementHub" class="dashboard-card" style="margin-bottom: 1.5rem; display: none;">
+                <div class="card-header" style="background: var(--blue-50); border-bottom: 1px solid var(--blue-200);">
+                    <h2 style="color: var(--blue-700);"><i class="fas fa-hand-holding-usd"></i> Debt Intelligence Hub
+                    </h2>
+                    <span id="settlementStatus"
+                        style="font-size: 0.7rem; color: var(--blue-400); font-weight: 700;">CALCULATING...</span>
+                </div>
+                <div class="card-body">
+                    <div id="settlementDetails" class="settlement-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-container">
+                <!-- Expense Filters -->
+                <div class="filters-section" style="padding: 1rem 1.5rem; margin-bottom: 1rem;">
+                    <div class="filter-options" style="margin-bottom: 0; flex-wrap: wrap; gap: 0.6rem;">
+                        <select class="filter-select" id="filterExpenseCategory">
+                            <option value="all">All Categories</option>
+                            <option value="accommodation">Accommodation</option>
+                            <option value="transport">Transport</option>
+                            <option value="food">Food &amp; Dining</option>
+                            <option value="activities">Activities</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <select class="filter-select" id="filterExpenseTrip">
+                            <option value="all">All Trips</option>
+                            <!-- Dynamic Options -->
+                        </select>
+                        <select class="filter-select" id="filterExpenseStatus" onchange="app.applyExpenseFilters()">
+                            <option value="all">All Status</option>
+                            <option value="pending">⏳ Pending</option>
+                            <option value="cleared">✓ Settled</option>
+                        </select>
+                        <input type="text" id="filterExpenseSearch" class="search-expenses"
+                            placeholder="Search expenses...">
+                    </div>
+                </div>
+
+                <!-- Expense Summary Cards -->
+                <div class="expense-summary" style="margin-bottom: 2rem;">
+                    <div class="summary-card">
+                        <div class="summary-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Total Spent</h3>
+                            <p class="amount" id="expSummaryTotal">0</p>
+                            <p class="summary-desc">Track your expenses</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">
+                            <i class="fas fa-plane-departure"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Travel Days</h3>
+                            <p class="amount" id="expSummaryDays">0 days</p>
+                            <p class="summary-desc">Total duration</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Avg. Daily Cost</h3>
+                            <p class="amount" id="expSummaryAvg">0</p>
+                            <p class="summary-desc" id="expSummaryAvgDesc">Based on travel days</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Destinations</h3>
+                            <p class="amount" id="expSummaryDest">0 places</p>
+                            <p class="summary-desc">Unique locations</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expenses Grid -->
+                <div id="expensesGrid" class="expenses-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;">
+                    <!-- Expense cards will load here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="analyticsView" class="view">
+            <div class="page-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-chart-line"></i> Analytics</h1>
+                    <p>Get insights about your travel patterns and spending</p>
+                </div>
+                <select class="filter-select" id="analyticsTimeFilter" onchange="app.loadAnalyticsData(this.value)">
+                    <option value="all">All Time</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 3 Months</option>
+                    <option value="180">Last 6 Months</option>
+                    <option value="year">This Year</option>
+                </select>
+            </div>
+
+            <div class="content-container">
+                <!-- Analytics Summary -->
+                <div class="analytics-summary">
+                    <div class="analytics-card">
+                        <div class="analytics-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="analytics-content">
+                            <h3>Total Spent</h3>
+                            <p class="analytics-value" id="analyticsTotalSpent">0</p>
+                            <p class="analytics-trend positive">Track your expenses</p>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="analytics-icon">
+                            <i class="fas fa-plane-departure"></i>
+                        </div>
+                        <div class="analytics-content">
+                            <h3>Travel Days</h3>
+                            <p class="analytics-value" id="analyticsTravelDays">0 days</p>
+                            <p class="analytics-trend positive">Total duration</p>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="analytics-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="analytics-content">
+                            <h3>Avg. Daily Cost</h3>
+                            <p class="analytics-value" id="analyticsAvgDaily">0</p>
+                            <p class="analytics-trend" id="analyticsAvgDailyDesc">Based on travel days</p>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="analytics-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="analytics-content">
+                            <h3>Destinations</h3>
+                            <p class="analytics-value" id="analyticsDestinations">0 places</p>
+                            <p class="analytics-trend">Unique locations</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Spending by Category</h3>
+                            <select class="filter-select small">
+                                <option>This Month</option>
+                                <option>Last Month</option>
+                            </select>
+                        </div>
+                        <div class="chart-canvas-container"
+                            style="height: 300px; position: relative; margin-top: 1rem;">
+                            <canvas id="categoryChartCanvas"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Monthly Spending Trend</h3>
+                        </div>
+                        <div class="chart-canvas-container"
+                            style="height: 300px; position: relative; margin-top: 1rem;">
+                            <canvas id="trendChartCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights Section -->
+                <div class="insights-section">
+                    <h3>AI Travel Insights</h3>
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <div class="insight-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h4>Budget Optimization</h4>
+                                <p>Book flights 3 weeks in advance to save up to 20% on travel costs.</p>
+                            </div>
+                        </div>
+
+                        <div class="insight-card">
+                            <div class="insight-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h4>Food Spending</h4>
+                                <p>Food expenses are 25% higher than average. Consider local restaurants.</p>
+                            </div>
+                        </div>
+
+                        <div class="insight-card">
+                            <div class="insight-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h4>Travel Pattern</h4>
+                                <p>You travel most in March and December. Plan early for better deals.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Smart Logistics Removed as per request -->
+            </div>
+
+        </div>
+
+
+
+        <!-- Add Reports View Here -->
+        <div id="reportsView" class="view">
+            <div class="page-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-file-invoice"></i> Reports Center</h1>
+                    <p>Analyze your travel spending with detailed reports and summaries</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-outline" onclick="app.loadReportsData()" style="margin-right: 0.5rem;">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+
+                </div>
+            </div>
+
+            <div class="content-container">
+                <!-- Report Filters & Search (Moved to top) -->
+                <div class="filters-section"
+                    style="background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+                    <div class="filter-options" style="margin-bottom: 0; align-items: center; gap: 1rem;">
+                        <div style="flex: 1; position: relative;">
+                            <i class="fas fa-search"
+                                style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                            <input type="text" id="reportSearch" class="search-expenses"
+                                placeholder="Search reports by trip name or type..."
+                                style="width: 100%; padding-left: 2.8rem; margin: 0; border-radius: 14px; border: 2px solid #e2e8f0; padding: 0.85rem 1rem 0.85rem 2.8rem; font-size: 0.95rem;"
+                                oninput="app.filterReports()">
+                        </div>
+                        <select class="filter-select" id="reportTypeFilter" onchange="app.filterReports()"
+                            style="margin: 0; border-radius: 14px; border: 2px solid #e2e8f0; padding: 0.85rem 1rem; font-weight: 600; min-width: 150px;">
+                            <option value="all">All Types</option>
+                            <option value="trip_summary">Trip Summary</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="category">Category</option>
+                        </select>
+                        <select class="filter-select" id="reportSort" onchange="app.filterReports()"
+                            style="margin: 0; border-radius: 14px; border: 2px solid #e2e8f0; padding: 0.85rem 1rem; font-weight: 600; min-width: 150px;">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="budget">By Budget</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Report Summary Stats -->
+                <div class="expense-summary"
+                    style="margin-bottom: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                    <div class="summary-card" style="min-width: 0; overflow: hidden;">
+                        <div class="summary-icon" style="background: rgba(42, 143, 170, 0.1); color: #2a8faa;">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Total Reports</h3>
+                            <p class="amount" id="reportCount">0</p>
+                            <p class="summary-desc">Generated so far</p>
+                        </div>
+                    </div>
+                    <div class="summary-card" style="min-width: 0; overflow: hidden;">
+                        <div class="summary-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Total Budget</h3>
+                            <p class="amount" id="portfolioTotal">0</p>
+                            <p class="summary-desc">Aggregate budget</p>
+                        </div>
+                    </div>
+                    <div class="summary-card" style="min-width: 0; overflow: hidden;">
+                        <div class="summary-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Last Report</h3>
+                            <p class="amount" id="lastReportDate" style="font-size: 1.2rem;">-</p>
+                            <p class="summary-desc">Most recent update</p>
+                        </div>
+                    </div>
+                    <div class="summary-card" style="min-width: 0; overflow: hidden;">
+                        <div class="summary-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3>Shared</h3>
+                            <p class="amount" id="sharedReportCount">0</p>
+                            <p class="summary-desc">With collaborators</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Grid -->
+                <div class="reports-grid" id="reportsGrid"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+                    <!-- Reports will load here -->
+                </div>
+
+                <!-- Detailed Report Sub-View (Hidden by default) -->
+                <div id="reportDetailSubView" style="display: none; margin-bottom: 3rem;">
+                    <button onclick="app.closeReportDetail()" class="btn-outline"
+                        style="margin-bottom: 1.5rem; border-radius: 12px; font-weight: 700;">
+                        <i class="fas fa-arrow-left"></i> Back to All Reports
+                    </button>
+                    <div id="reportDetailUIBox"
+                        style="background: white; border-radius: 32px; padding: 0.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+                        <!-- Content injected by viewReport -->
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+
+
+
+
+        <div id="profileView" class="view">
+            <div class="page-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-user-cog"></i> My Profile</h1>
+                    <p>Manage your account security and personal details</p>
+                </div>
+            </div>
+
+            <div class="content-container">
+                <div class="profile-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+                    <!-- Personal Details -->
+                    <div class="dashboard-card profile-card"
+                        style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+                        <div class="card-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #f1f5f9;">
+                            <h2 style="font-size: 1.25rem; font-weight: 800; color: #0b3b5b;"><i class="fas fa-id-card"
+                                    style="color: #2a8faa; margin-right: 0.75rem;"></i>
+                                Personal Details</h2>
+                        </div>
+                        <div class="card-body" style="padding: 2rem;">
+                            <form id="profileUpdateForm" onsubmit="event.preventDefault(); app.updateProfileInfo();">
+                                <div style="margin-bottom: 2rem; text-align: center;">
+                                    <div class="profile-avatar-large"
+                                        style="width: 140px; height: 140px; border-radius: 50%; border: 5px solid white; margin: 0 auto 1.5rem auto; overflow: hidden; position: relative; box-shadow: 0 15px 35px rgba(11, 59, 91, 0.2);">
+                                        <img id="profileViewAvatar"
+                                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=John"
+                                            alt="Large Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <label for="profileViewAvatarUpload"
+                                            style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; cursor: pointer; color: white;">
+                                            <i class="fas fa-camera" style="font-size: 2rem;"></i>
+                                        </label>
+                                        <input type="file" id="profileViewAvatarUpload" accept="image/*"
+                                            style="display: none;" onchange="uploadProfilePicture(this)">
+                                    </div>
+                                    <h3 class="user-name-display"
+                                        style="margin-bottom: 0.35rem; font-size: 1.5rem; font-weight: 800; color: #0b3b5b;">
+                                        User Name</h3>
+                                    <p class="user-email-display" style="color: #64748b; font-weight: 500;">
+                                        user@intellitrip.com
+                                    </p>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 2rem;">
+                                    <label
+                                        style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: #0b3b5b; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Display
+                                        Name</label>
+                                    <div style="position: relative;">
+                                        <i class="fas fa-user"
+                                            style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                                        <input type="text" id="updateNameInput" value="User Name"
+                                            style="width: 100%; padding: 1rem 1.25rem 1rem 3.25rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-weight: 600; outline: none; transition: 0.3s; color: #1e293b;"
+                                            onfocus="this.style.borderColor='#2a8faa'; this.style.background='white';">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 2rem;">
+                                    <div
+                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.75rem;">
+                                        <label
+                                            style="font-weight: 700; color: #0b3b5b; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                            UPI Payment ID
+                                        </label>
+                                        <span
+                                            style="font-size:0.65rem; background:#ecfdf5; color:#059669; padding:2px 8px; border-radius:12px; font-weight:700; border:1px solid #d1fae5;">
+                                            <i class="fas fa-lock" style="margin-right:3px;"></i> End-to-End
+                                            Encrypted
+                                        </span>
+                                    </div>
+                                    <div style="position: relative;">
+                                        <div
+                                            style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); display:flex; align-items:center; gap:0.5rem; color: #94a3b8;">
+                                            <i class="fas fa-mobile-alt" style="font-size:1.1rem;"></i>
+                                            <div style="width:1px; height:16px; background:#e2e8f0;"></div>
+                                        </div>
+                                        <input type="text" id="updateUpiInput" placeholder="username@oksbi"
+                                            style="width: 100%; padding: 1rem 1.25rem 1rem 3.5rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-weight: 600; outline: none; transition: all 0.3s; color: #0b3b5b; font-family:'Inter', sans-serif;"
+                                            onfocus="this.style.borderColor='#2a8faa'; this.style.background='white'; this.style.boxShadow='0 4px 12px rgba(42, 143, 170, 0.1)';"
+                                            onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
+                                        <i class="fas fa-check-circle"
+                                            style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); color: #10b981; opacity: 0; transition: 0.3s;"
+                                            id="upiVerifiedIcon"></i>
+                                    </div>
+                                    <p
+                                        style="font-size: 0.75rem; color: #64748b; margin-top: 0.6rem; display:flex; align-items:center; gap:0.4rem;">
+                                        <i class="fas fa-info-circle" style="color:#2a8faa;"></i>
+                                        Links directly to your GPay, PhonePe, or Paytm apps for settling splits.
+                                    </p>
+                                </div>
+                                <button type="submit" id="updateProfileBtn" class="btn-primary"
+                                    style="width: 100%; padding: 1.15rem; border-radius: 14px; font-weight: 700; font-size: 1rem; box-shadow: 0 4px 12px rgba(42, 143, 170, 0.25);">
+                                    <i class="fas fa-save" style="margin-right: 0.5rem;"></i> Save Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Security Section -->
+                    <div class="dashboard-card security-card"
+                        style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+                        <div class="card-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #f1f5f9;">
+                            <h2 style="font-size: 1.25rem; font-weight: 800; color: #0b3b5b;"><i
+                                    class="fas fa-shield-alt" style="color: #ef4444; margin-right: 0.75rem;"></i>
+                                Account & Security</h2>
+                        </div>
+                        <div class="card-body" style="padding: 2rem;">
+                            <!-- Currency Setting (Moved here for better space) -->
+
+                            <!-- Currency & Regional Setting -->
+                            <h4
+                                style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 1.25rem; font-weight: 700;">
+                                Regional Preferences</h4>
+
+                            <div class="form-group" style="margin-bottom: 2rem;">
+                                <label
+                                    style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: #0b3b5b; font-size: 0.9rem;">Preferred
+                                    Currency</label>
+                                <!-- Currency search box -->
+                                <div style="position: relative; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-search"
+                                        style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                                    <input type="text" id="currencySearchInput"
+                                        placeholder="Search currency (e.g. EUR, Dollar, Yen)..."
+                                        oninput="filterCurrencyDropdown(this.value)"
+                                        style="width: 100%; padding: 0.75rem 1rem 0.75rem 3.25rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-weight: 500; outline: none; font-size: 0.9rem; box-sizing: border-box;"
+                                        onfocus="this.style.borderColor='#2a8faa'"
+                                        onblur="this.style.borderColor='#f1f5f9'">
+                                </div>
+                                <div style="position: relative;">
+                                    <i class="fas fa-coins"
+                                        style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #94a3b8; z-index:1;"></i>
+                                    <select id="profileCurrencySelect"
+                                        onchange="app.updatePreferredCurrency(this.value)" size="1"
+                                        style="width: 100%; padding: 1rem 1.25rem 1rem 3.25rem; border-radius: 14px; border: 2px solid #f1f5f9; background: #f8fafc; font-weight: 600; outline: none; appearance: none; cursor: pointer; transition: all 0.3s; color: #0b3b5b; font-family:'Inter', sans-serif;"
+                                        onfocus="this.style.borderColor='#2a8faa'; this.style.background='white'; this.style.boxShadow='0 4px 12px rgba(42, 143, 170, 0.1)';"
+                                        onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
+                                        <!-- Populated dynamically by JS -->
+                                    </select>
+                                    <i class="fas fa-chevron-down"
+                                        style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;"></i>
+                                </div>
+                                <p style="font-size: 0.7rem; color: #64748b; margin-top: 0.5rem;"><i
+                                        class="fas fa-satellite-dish"></i> Live exchange rates • Updated hourly from
+                                    open APIs</p>
+                            </div>
+
+                            <hr style="margin: 2.5rem 0; border: none; border-top: 1px solid #f1f5f9;">
+
+                            <h4
+                                style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 1.25rem; font-weight: 700;">
+                                Password Management</h4>
+
+                            <!-- Change Password Request -->
+                            <div id="passwordRequestStep">
+                                <p style="color: #64748b; margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.5;">
+                                    Protect your account by using a strong, unique password.</p>
+                                <button onclick="app.showPasswordChangeModal()" class="btn-outline"
+                                    style="width: 100%; padding: 1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border: 2px solid #e2e8f0; font-weight: 700; color: #0b3b5b;">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                            </div>
+
+                            <hr style="margin: 2.5rem 0; border: none; border-top: 1px solid #f1f5f9;">
+
+                            <h4
+                                style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 1.25rem; font-weight: 700;">
+                                Danger Zone</h4>
+
+                            <!-- Logout & Delete -->
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <button onclick="app.logout()" class="btn-outline"
+                                    style="width: 100%; padding: 1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border: 2px solid #e2e8f0; font-weight: 700; color: #1e293b;">
+                                    <i class="fas fa-sign-out-alt"></i> Logout from Account
+                                </button>
+
+                                <div id="deleteRequestStep">
+                                    <button onclick="app.requestAccountDeletion()" class="btn-danger-outline"
+                                        style="width: 100%; padding: 1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border: 2px solid #fee2e2; color: #ef4444; font-weight: 700;">
+                                        <i class="fas fa-trash-alt"></i> Delete My Account
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Delete Account OTP Step -->
+                            <div id="deleteOTPStep" style="display: none;">
+                                <div
+                                    style="background: #fff5f5; border: 1px solid #fed7d7; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; gap: 0.75rem;">
+                                    <i class="fas fa-exclamation-triangle"
+                                        style="color: #ef4444; font-size: 1.25rem;"></i>
+                                    <p style="font-size: 0.85rem; color: #9b1c1c; line-height: 1.4;">
+                                        <strong>Critical
+                                            Action:</strong> Enter the verification code sent to your email to
+                                        confirm
+                                        permanent deletion.
+                                    </p>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <input type="text" id="deleteOTP" maxlength="6" placeholder="000000"
+                                        style="width: 100%; padding: 1rem; border-radius: 14px; border: 2px solid #fee2e2; text-align: center; letter-spacing: 6px; font-weight: 800; font-size: 1.5rem; color: #ef4444;">
+                                </div>
+                                <div style="display: flex; gap: 1rem;">
+                                    <button
+                                        onclick="document.getElementById('deleteOTPStep').style.display='none'; document.getElementById('deleteRequestStep').style.display='block';"
+                                        style="flex: 1; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; background: white; font-weight: 600; cursor: pointer;">Cancel</button>
+                                    <button id="confirmDelBtn" onclick="app.confirmAccountDeletion()" class="btn-danger"
+                                        style="flex: 2; padding: 1rem; border-radius: 12px; border: none; background: #ef4444; color: white; font-weight: 700; cursor: pointer;">Permanently
+                                        Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <!-- End of main-content -->
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- AI Trip Intelligence Modal -->
+    <div id="tripAuditModal" class="modal-premium"
+        style="display:none; position:fixed; inset:0; z-index:999999; align-items:center; justify-content:center; background:rgba(11, 23, 42, 0.7); backdrop-filter:blur(15px);">
+        <div class="modal-card"
+            style="width: 95%; max-width: 850px; max-height: 90vh; overflow-y: auto; background: white; border-radius: 32px; padding: 0; box-shadow: 0 50px 100px -20px rgba(11, 59, 91, 0.35); border: 1px solid rgba(255,255,255,0.4);">
+            <div
+                style="position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 1.5rem 2rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                <div>
+                    <h2
+                        style="margin: 0; font-size: 1.5rem; color: #0b3b5b; font-weight: 800; display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-robot" style="color: #2a8faa;"></i> IntelliTrip Master Audit
+                    </h2>
+                    <p id="auditTripName" style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.9rem;"></p>
+                </div>
+                <button onclick="document.getElementById('tripAuditModal').style.display='none'"
+                    style="background: #f1f5f9; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; color: #64748b; transition: 0.3s;"
+                    onmouseover="this.style.background='#FEF2F2'; this.style.color='#EF4444'"
+                    onmouseout="this.style.background='#f1f5f9'; this.style.color='#64748b'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="tripAuditBody" style="padding: 2rem;">
+                <div class="audit-loading" style="text-align: center; padding: 4rem 0;">
+                    <div class="spinner-premium"
+                        style="width: 60px; height: 60px; border-width: 6px; margin-bottom: 1.5rem;"></div>
+                    <h3 style="color: #0b3b5b; font-weight: 700;">Analyzing your journey...</h3>
+                    <p style="color: #64748b;">Our AI is auditing your expenses and discovering hidden gems.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Detail Modal -->
+    <div id="reportDetailModal" class="modal-premium"
+        style="display:none; position:fixed; inset:0; z-index:999999; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); backdrop-filter:blur(10px);">
+        <div class="modal-card"
+            style="width: 95%; max-width: 700px; max-height: 90vh; overflow-y: auto; background: white; border-radius: 24px; padding: 0;">
+            <div
+                style="position: sticky; top: 0; background: white; padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                <h2 id="reportDetailTitle" style="margin: 0; font-size: 1.25rem; color: #0b3b5b; font-weight: 800;">
+                    <i class="fas fa-file-invoice" style="margin-right: 0.5rem; color: #2a8faa;"></i> Detailed Report
+                </h2>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button class="btn-outline" onclick="window.print()"
+                        style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                    <button class="btn-primary" onclick="app.downloadReport()"
+                        style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        <i class="fas fa-download"></i> PDF
+                    </button>
+                    <button onclick="document.getElementById('reportDetailModal').style.display='none'"
+                        style="background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: #64748b;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="reportDetailBody" style="padding: 1.25rem;">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Profile Picture Upload Logic
+        async function uploadProfilePicture(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validate size (max 30MB)
+                if (file.size > 30 * 1024 * 1024) {
+                    if (window.app) window.app.showToast('Image size must be less than 30MB', 'error');
+                    else app.showToast('Image size must be less than 30MB', 'warning');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = async function (e) {
+                    const base64Image = e.target.result;
+
+                    // Optimistic UI update
+                    const dashAvatar = document.getElementById('dashboardAvatar');
+                    const profileAvatar = document.getElementById('profileViewAvatar');
+                    const cardAvatar = document.getElementById('cardAvatar');
+                    if (dashAvatar) dashAvatar.src = base64Image;
+                    if (profileAvatar) profileAvatar.src = base64Image;
+                    if (cardAvatar) cardAvatar.src = base64Image;
+
+                    try {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                            if (window.app) window.app.showToast('Session expired. Please login again.', 'error');
+                            else app.showToast('Session expired. Please login again.', 'info');
+                            window.location.href = 'login.html';
+                            return;
+                        }
+
+                        const formData = new FormData();
+                        formData.append('profile_picture', file);
+
+                        const res = await fetch('/api/auth/upload-picture', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': token
+                            },
+                            body: formData
+                        });
+
+
+                        const data = await res.json();
+                        if (!res.ok) {
+                            throw new Error(data.msg || 'Upload failed');
+                        }
+
+                        // Update user object in localStorage
+                        const user = JSON.parse(localStorage.getItem('user') || '{}');
+                        user.profile_picture = data.profile_picture;
+                        localStorage.setItem('user', JSON.stringify(user));
+
+
+                        if (window.app && window.app.showToast) window.app.showToast('Profile picture updated!', 'success');
+                        else if (typeof showToast === 'function') showToast('Profile picture updated!', 'success');
+
+                    } catch (err) {
+                        console.error(err);
+                        if (window.app) window.app.showToast(err.message || 'Failed to update profile picture', 'error');
+                        else app.showToast(err.message || 'Failed to update profile picture', 'error');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Initialize user data on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                if (user.profile_picture) {
+                    const dashAvatar = document.getElementById('dashboardAvatar');
+                    const profileAvatar = document.getElementById('profileViewAvatar');
+                    const getFullUrl = (p) => (p && !p.startsWith('data:') && !p.startsWith('http')) ? `${p}` : p;
+                    const finalUrl = getFullUrl(user.profile_picture);
+                    if (dashAvatar) dashAvatar.src = finalUrl;
+                    if (profileAvatar) profileAvatar.src = finalUrl;
+                }
+
+                const nameEls = document.querySelectorAll('.user-name');
+                nameEls.forEach(el => el.textContent = user.name || 'User');
+                const nameDisplayEls = document.querySelectorAll('.user-name-display');
+                nameDisplayEls.forEach(el => el.textContent = user.name || 'User');
+                const emailEls = document.querySelectorAll('.user-email');
+                emailEls.forEach(el => el.textContent = user.email || '');
+                const emailDisplayEls = document.querySelectorAll('.user-email-display');
+                emailDisplayEls.forEach(el => el.textContent = user.email || '');
+            }
+        });
+    </script>
+    <script>
+        // AGGRESSIVE CACHE BUSTING - REMOVE ALL PREVIOUS VERSIONS
+        console.log('🔄 Cleaning AI Tip Caches...');
+        localStorage.removeItem('cachedAITips');
+        localStorage.removeItem('savedAITips');
+        localStorage.removeItem('aiTips');
+
+        // Force version increment in the browser's eyes
+        if (!window.location.search.includes('v=')) {
+            // window.location.href = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'v=' + Date.now();
+        }
+    </script>
+    <script src="currency_service.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="app.js?v=2026.02.19.10"></script>
+    <script src="skywriting.js?v=final.release.2"></script>
+    <script src="premium.js?v=final.release.2"></script>
+    <script src="planner.js?v=2026.02.19.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script>
+        // Profile & Currency Initialization
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Populate Currency Dropdown from full world list
+            const currencySelect = document.getElementById('profileCurrencySelect');
+            if (currencySelect && window.currencyService) {
+                const currencies = window.currencyService.getAllCurrencies();
+                const symbols = window.currencyService.getAllSymbols();
+                currencies.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.code;
+                    const sym = symbols[c.code] || c.code;
+                    opt.textContent = `${c.flag} ${c.code} - ${c.name} (${sym})`;
+                    currencySelect.appendChild(opt);
+                });
+            }
+
+            // Currency search filter helper
+            window.filterCurrencyDropdown = function (query) {
+                const select = document.getElementById('profileCurrencySelect');
+                if (!select || !window.currencyService) return;
+                const q = query.toLowerCase().trim();
+                const currencies = window.currencyService.getAllCurrencies();
+                const symbols = window.currencyService.getAllSymbols();
+
+                // Remove all options first
+                select.innerHTML = '';
+                const filtered = q
+                    ? currencies.filter(c =>
+                        c.code.toLowerCase().includes(q) ||
+                        c.name.toLowerCase().includes(q) ||
+                        (symbols[c.code] || '').includes(q)
+                    )
+                    : currencies;
+
+                filtered.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.code;
+                    const sym = symbols[c.code] || c.code;
+                    opt.textContent = `${c.flag} ${c.code} - ${c.name} (${sym})`;
+                    select.appendChild(opt);
+                });
+
+                // Re-select user's current preference
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    if (user.preferred_currency) select.value = user.preferred_currency;
+                }
+            };
+
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+
+                // Set currency dropdown
+                if (currencySelect && user.preferred_currency) {
+                    currencySelect.value = user.preferred_currency;
+                }
+
+                // Update Avatars
+                if (user.profile_picture) {
+                    const dashAvatar = document.getElementById('dashboardAvatar');
+                    const profileAvatar = document.getElementById('profileViewAvatar');
+                    if (dashAvatar) dashAvatar.src = user.profile_picture;
+                    if (profileAvatar) profileAvatar.src = user.profile_picture;
+                }
+
+                // Update Names/Emails
+                document.querySelectorAll('.user-name, .user-name-display').forEach(el => el.textContent = user.name || 'User');
+                document.querySelectorAll('.user-email, .user-email-display').forEach(el => el.textContent = user.email || '');
+
+                // Set name input
+                const nameInput = document.getElementById('updateNameInput');
+                if (nameInput) nameInput.value = user.name || '';
+                // Set UPI input
+                const upiInput = document.getElementById('updateUpiInput');
+                if (upiInput) upiInput.value = user.upi_id || '';
+            }
+        });
+    </script>
+
+
+    <!-- Ultra-Compact Next-Gen Exchange Hub -->
+    <div id="currencyModal" class="modal-premium">
+        <div class="modal-card"
+            style="max-width: 320px; padding: 0; overflow: hidden; border: 1px solid rgba(42, 143, 170, 0.3); border-radius: 16px;">
+            <div
+                style="background: linear-gradient(135deg, #0B3B5B 0%, #2A8FAA 100%); padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; margin: 0; font-size: 0.9rem; font-weight: 700;"><i
+                        class="fas fa-exchange-alt"></i> Nano-Exchange</h3>
+                <button onclick="app.closeCurrencyConverter()"
+                    style="background: rgba(255,255,255,0.2); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i
+                        class="fas fa-times" style="font-size: 0.7rem;"></i></button>
+            </div>
+
+            <div class="modal-body" style="padding: 0.75rem; background: #fff;">
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+
+                    <!-- Sell Row -->
+                    <div
+                        style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.5rem; border-radius: 8px; border: 1px solid #f1f5f9;">
+                        <div style="flex: 1;">
+                            <span
+                                style="font-size: 0.6rem; color: #94a3b8; font-weight: 800; text-transform: uppercase;">Sell</span>
+                            <input type="number" id="convertFromAmount" value="100"
+                                style="width: 100%; border: none; background: transparent; font-size: 1.1rem; font-weight: 700; color: #0B3B5B; outline: none; padding: 0;">
+                        </div>
+                        <select id="convertFromCurrency"
+                            style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px; font-weight: 700; color: #0B3B5B; cursor: pointer; font-size: 0.75rem;">
+                            <option value="INR">INR</option>
+                        </select>
+                    </div>
+
+                    <!-- Compact Swap -->
+                    <div style="display: flex; justify-content: center; margin: -0.5rem 0; z-index: 10;">
+                        <button onclick="app.swapConverterCurrencies()"
+                            style="background: #2A8FAA; border: 2px solid #fff; color: white; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="fas fa-exchange-alt" style="transform: rotate(90deg); font-size: 0.6rem;"></i>
+                        </button>
+                    </div>
+
+                    <!-- Buy Row -->
+                    <div
+                        style="display: flex; align-items: center; gap: 0.5rem; background: #f0fdf4; padding: 0.5rem; border-radius: 8px; border: 1px solid #dcfce7;">
+                        <div style="flex: 1;">
+                            <span
+                                style="font-size: 0.6rem; color: #16a34a; font-weight: 800; text-transform: uppercase;">Buy</span>
+                            <input type="text" id="convertToAmount" value="0.00" readonly
+                                style="width: 100%; border: none; background: transparent; font-size: 1.1rem; font-weight: 700; color: #16a34a; outline: none; padding: 0;">
+                        </div>
+                        <select id="convertToCurrency"
+                            style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px; font-weight: 700; color: #16a34a; cursor: pointer; font-size: 0.75rem;">
+                            <option value="USD">USD</option>
+                        </select>
+                    </div>
+
+                    <div id="exchangeRateInfo"
+                        style="text-align: center; color: #64748b; font-size: 0.65rem; font-weight: 600; padding: 0.35rem;">
+                        Loading rates...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</body>
+
+</html>

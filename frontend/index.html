@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliTrip | AI-Powered Smart Travel Companion</title>
+    <link rel="stylesheet" href="index.css?v=5">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&family=Dancing+Script:wght@700&display=swap"
+        rel="stylesheet">
+</head>
+
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="logo.jpeg" alt="IntelliTrip Logo" class="logo-img">
+                <span>IntelliTrip</span>
+            </a>
+            <div class="nav-menu">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="login-btn">Log In</a>
+                <a href="signup.html" class="signup-btn">Get Started</a>
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg-slider">
+            <div class="slide"
+                style="background-image: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop')">
+            </div>
+            <div class="slide"
+                style="background-image: url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2076&auto=format&fit=crop')">
+            </div>
+            <div class="slide"
+                style="background-image: url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2070&auto=format&fit=crop')">
+            </div>
+            <div class="slide"
+                style="background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2074&auto=format&fit=crop')">
+            </div>
+            <div class="slide"
+                style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop')">
+            </div>
+            <div class="slide"
+                style="background-image: url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop')">
+            </div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="badge">
+                    <i class="fas fa-star"></i> AI-Powered Platform
+                </div>
+                <h1>Travel Smarter with <span class="highlight">AI Intelligence</span></h1>
+                <p class="subtitle">IntelliTrip revolutionizes group travel with artificial intelligence that plans,
+                    splits expenses, and suggests personalized activities – all automatically.</p>
+
+                <div class="hero-actions">
+                    <a href="signup.html" class="cta-primary">
+                        <i class="fas fa-rocket"></i> Start Planning Now
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="dashboard-preview">
+                    <div class="dashboard-header">
+                        <div class="dashboard-controls">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span>Active Trip: Summer Getaway</span>
+                    </div>
+                    <div class="dashboard-content">
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h4>AI Suggestions</h4>
+                                <p>5 optimal dates found</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h4>Budget</h4>
+                                <p>₹2,400 / ₹3,000</p>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-card highlight">
+                            <div class="metric-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h4>Group Split</h4>
+                                <p>4 travelers • Fair division</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Intelligent Travel Features</h2>
+                <p class="section-subtitle">Powered by advanced AI to make your group travel seamless and enjoyable</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI Trip Planning</h3>
+                    <p>Our AI analyzes weather patterns, crowd data, and pricing trends to suggest the perfect travel
+                        dates and destinations for your group.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <h3>Smart Expense Splitting</h3>
+                    <p>Automatically divide costs based on individual preferences, income levels, and spending habits
+                        for completely fair sharing.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <h3>Receipt Scanning</h3>
+                    <p>Use our AI-powered OCR technology to scan receipts and automatically categorize expenses. No more
+                        manual entry.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3>Activity Recommendations</h3>
+                    <p>Get personalized activity suggestions based on your group's interests, previous ratings, and
+                        local popularity scores.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Budget Forecasting</h3>
+                    <p>AI predicts your total trip expenses based on destination, duration, group size, and travel style
+                        before you even book.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3>Real-time Collaboration</h3>
+                    <p>All group members can view, edit, and contribute to trip plans in real-time, with automatic sync
+                        across all devices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>Simple 4-Step Process</h2>
+                <p class="section-subtitle">Get from planning to enjoying in minutes</p>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">01</div>
+                    <div class="step-content">
+                        <h3>Create Your Group</h3>
+                        <p>Invite your travel companions and set your destination. Our AI will immediately start
+                            analyzing optimal travel conditions.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">02</div>
+                    <div class="step-content">
+                        <h3>AI Planning Phase</h3>
+                        <p>Receive smart suggestions for travel dates, budget estimates, and personalized activities
+                            tailored to your group.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">03</div>
+                    <div class="step-content">
+                        <h3>Track & Manage</h3>
+                        <p>Scan receipts, track expenses in real-time, and let our AI handle the splitting. Everyone
+                            sees updates instantly.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">04</div>
+                    <div class="step-content">
+                        <h3>Enjoy & Settle</h3>
+                        <p>Focus on making memories. At trip end, settle payments seamlessly through our secure payment
+                            system.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Transform Your Group Travel?</h2>
+                <p>Join thousands of smart travelers who trust IntelliTrip for seamless trip planning and expense
+                    management.</p>
+                <div class="cta-actions">
+                    <a href="signup.html" class="cta-primary large">
+                        <i class="fas fa-user-plus"></i> Create Your Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-bottom">
+            <p>&copy; 2025 IntelliTrip. All rights reserved. Made for travelers worldwide.</p>
+        </div>
+    </footer>
+
+    <script src="app.js?v=2026.02.11.999"></script>
+
+    <!-- Mobile menu toggle - self-contained, survives any DOM re-render -->
+    <script>
+        (function () {
+            document.addEventListener('click', function (e) {
+                // Toggle open
+                var btn = e.target.closest('#menuToggle');
+                if (btn) {
+                    e.stopPropagation();
+                    var menu = document.querySelector('.nav-menu');
+                    if (!menu) return;
+                    var open = menu.classList.toggle('active');
+                    // Update icon on whichever element currently has id=menuToggle
+                    var toggle = document.getElementById('menuToggle');
+                    if (toggle) toggle.innerHTML = open ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+                    return;
+                }
+                // Close on nav link click
+                var link = e.target.closest('.nav-menu a');
+                if (link) {
+                    var menu = document.querySelector('.nav-menu');
+                    if (menu) menu.classList.remove('active');
+                    var toggle = document.getElementById('menuToggle');
+                    if (toggle) toggle.innerHTML = '<i class="fas fa-bars"></i>';
+                }
+            }, true); // capture phase so it fires before any other handler
+        })();
+    </script>
+
+</body>
+
+</html>

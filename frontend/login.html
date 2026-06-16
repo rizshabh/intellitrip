@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | IntelliTrip</title>
+    <link rel="stylesheet" href="index.css?v=2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Auth Pages Specific Styles */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--sand-100) 0%, var(--blue-200) 100%);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%232a8faa' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .auth-card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 3rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            z-index: 1;
+            border: 1px solid var(--blue-200);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: fadeIn 0.6s ease-out 0.1s backwards;
+        }
+
+        .auth-header .logo {
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            gap: 15px;
+        }
+
+        .auth-header .logo-img {
+            width: 48px;
+            height: 48px;
+            border: 2px solid var(--blue-400);
+            box-shadow: 0 4px 12px rgba(42, 143, 170, 0.2);
+            transition: var(--transition);
+        }
+
+        .auth-header .logo-img:hover {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .auth-header h2 {
+            color: var(--navy-900);
+            margin-bottom: 0.75rem;
+            font-size: 1.75rem;
+        }
+
+        .auth-header p {
+            color: var(--gray-500);
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.65rem;
+            color: var(--navy-700);
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 2px solid var(--blue-200);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--gray-50);
+            font-weight: 500;
+        }
+
+        .form-control::placeholder {
+            color: var(--gray-400);
+            opacity: 0.8;
+        }
+
+        .form-control:hover {
+            border-color: var(--blue-400);
+            background: var(--white);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--blue-600);
+            box-shadow: 0 0 0 4px rgba(42, 143, 170, 0.15), inset 0 0 0 1px rgba(42, 143, 170, 0.1);
+            background: var(--white);
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-wrapper .form-control {
+            flex: 1;
+        }
+
+        .input-toggle {
+            background: none;
+            border: 2px solid var(--blue-200);
+            cursor: pointer;
+            color: var(--gray-500);
+            padding: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-toggle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(42, 143, 170, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+            pointer-events: none;
+        }
+
+        .input-toggle:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .input-toggle:hover {
+            color: var(--blue-600);
+            border-color: var(--blue-600);
+            background: rgba(87, 193, 211, 0.1);
+            transform: scale(1.05);
+        }
+
+        .input-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 0.9rem 1.5rem;
+            background: var(--gradient-sky);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(42, 143, 170, 0.3);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.3px;
+        }
+
+        .auth-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+            pointer-events: none;
+        }
+
+        .auth-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(42, 143, 170, 0.5);
+        }
+
+        .auth-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(42, 143, 170, 0.3);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--blue-200);
+        }
+
+        .auth-footer p {
+            color: var(--gray-500);
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-footer a {
+            color: var(--blue-600);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .auth-footer a:hover {
+            color: var(--navy-700);
+            text-decoration: underline;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: var(--navy-700);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            z-index: 2;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--blue-200);
+        }
+
+        .back-home:hover {
+            color: var(--blue-600);
+            background: var(--white);
+            transform: translateX(-5px);
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(229, 62, 62, 0.1);
+            border-left: 4px solid #e53e3e;
+            border-radius: var(--border-radius);
+            text-align: left;
+            display: none;
+            animation: slideInDown 0.3s ease;
+        }
+
+        .success-message {
+            color: #38a169;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(56, 161, 105, 0.1);
+            border-left: 4px solid #38a169;
+            border-radius: var(--border-radius);
+            text-align: left;
+            display: none;
+            animation: slideInDown 0.3s ease;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .auth-card {
+                padding: 2rem 1.5rem;
+                max-width: 100%;
+                margin: 1rem;
+            }
+
+            .auth-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .back-home {
+                top: 1rem;
+                left: 1rem;
+                font-size: 0.9rem;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+            }
+
+            .input-wrapper {
+                gap: 0.4rem;
+            }
+
+            .input-toggle {
+                width: 40px;
+                height: 40px;
+                padding: 0.65rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 1.5rem;
+                margin: 1rem 0.5rem;
+            }
+
+            .auth-header {
+                margin-bottom: 2rem;
+            }
+
+            .auth-header h2 {
+                font-size: 1.35rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .auth-header .logo-img {
+                width: 44px;
+                height: 44px;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem;
+            }
+
+            .auth-btn {
+                padding: 0.8rem 1rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: var(--white);
+            color: var(--navy-900);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            min-width: 300px;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 6px solid var(--blue-600);
+            animation: toastSlideIn 0.3s forwards;
+            border: 1px solid var(--blue-200);
+        }
+
+        .toast.error {
+            border-left-color: var(--error);
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        .toast.hide {
+            animation: toastSlideOut 0.3s forwards;
+        }
+
+        @keyframes toastSlideIn {
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toastSlideOut {
+            to {
+                transform: translateX(120%);
+            }
+        }
+
+        @media (max-width: 768px) {
+            #toast-container {
+                top: auto;
+                bottom: 24px;
+                right: 12px;
+                left: 12px;
+            }
+
+            .toast {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="back-home">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <div class="auth-container">
+        <div class="auth-card auth-large">
+            <div class="auth-header">
+                <div class="logo">
+                    <img src="logo.jpeg" alt="IntelliTrip Logo" class="logo-img">
+                    <span>IntelliTrip</span>
+                </div>
+                <h2>Welcome Back</h2>
+                <p>Sign in to your account</p>
+            </div>
+
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" class="form-control" placeholder="Enter your password"
+                            required>
+                        <button type="button" class="input-toggle" id="togglePassword"
+                            aria-label="Toggle password visibility" title="Show/hide password"><i
+                                class="fa-solid fa-eye"></i></button>
+                    </div>
+                    <div style="margin-top:8px;text-align:right"><a href="forgot-password.html"
+                            style="font-size:0.9rem;color:var(--blue-600);text-decoration:none;transition:color 0.2s">Forgot
+                            password?</a></div>
+                </div>
+
+                <button type="submit" class="auth-btn" id="loginBtn">Sign In</button>
+                <div class="error-message" id="loginError"></div>
+                <div class="success-message" id="loginSuccess"></div>
+            </form>
+
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal"
+        style="display:none; position:fixed; inset:0; z-index:300; align-items:center; justify-content:center; background:rgba(11,59,91,0.5); backdrop-filter:blur(2px);">
+        <div
+            style="position:relative; z-index:301; width:100%; max-width:480px; margin:auto; background:var(--white); border-radius:16px; padding:2rem; box-shadow:var(--shadow-xl); border: 1px solid var(--blue-200); animation: slideDown 0.3s ease;">
+
+            <button type="button"
+                style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:1.5rem; color:var(--gray-400); cursor:pointer; padding:0.5rem; transition:color 0.2s"
+                onclick="document.getElementById('forgotModal').style.display='none'"><i
+                    class="fas fa-times"></i></button>
+
+            <!-- Step 1: Request OTP -->
+            <div id="step1">
+                <h3 style="margin:0 0 0.5rem 0; font-size:1.25rem; font-weight:600; color:var(--navy-900)">Reset
+                    Password</h3>
+                <p style="margin:0 0 1.5rem 0;color:var(--gray-500);font-size:0.95rem">Enter your email to receive a
+                    One-Time Password (OTP).</p>
+                <input id="resetEmail" class="form-control" type="email" placeholder="Your email address"
+                    style="margin-bottom:1rem">
+                <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+                    <button id="cancelReset" class="auth-btn"
+                        style="background:transparent; border:1px solid var(--gray-300); color:var(--gray-600); width:auto; text-align:center; box-shadow:none;">Cancel</button>
+                    <button id="sendReset" class="auth-btn" style="width:auto; margin-top:0;">Send OTP</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Verify OTP & New Password -->
+            <div id="step2" style="display:none;">
+                <h3 style="margin:0 0 0.5rem 0; font-size:1.25rem; font-weight:600; color:var(--navy-900)">Enter New
+                    Password</h3>
+                <p style="margin:0 0 1.5rem 0;color:var(--gray-500);font-size:0.95rem">We sent a code to your email.
+                    Enter it below.</p>
+
+                <div class="form-group">
+                    <input id="otpInput" class="form-control" type="text" placeholder="Enter 6-digit OTP" maxlength="6"
+                        style="margin-bottom:1rem; text-align:center; letter-spacing:5px; font-size:1.2rem;">
+                </div>
+
+                <div class="form-group">
+                    <input id="newPassword" class="form-control" type="password" placeholder="New Password"
+                        style="margin-bottom:1rem">
+                </div>
+
+                <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+                    <button id="backToStep1" class="auth-btn"
+                        style="background:transparent; border:1px solid var(--gray-300); color:var(--gray-600); width:auto; box-shadow:none;">Back</button>
+                    <button id="submitReset" class="auth-btn" style="width:auto; margin-top:0;">Reset Password</button>
+                </div>
+            </div>
+
+            <div id="resetMessage"
+                style="margin-top:1rem; padding:0.75rem; border-radius:8px; display:none; font-size:0.95rem; text-align:center;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginError = document.getElementById('loginError');
+            const loginSuccess = document.getElementById('loginSuccess');
+
+            const passwordInput = document.getElementById('password');
+            const togglePassword = document.getElementById('togglePassword');
+
+            // Forgot Password IDs
+            const forgotLink = document.getElementById('forgotPasswordLink');
+            const forgotModal = document.getElementById('forgotModal');
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const resetEmail = document.getElementById('resetEmail');
+            const sendReset = document.getElementById('sendReset');
+            const cancelReset = document.getElementById('cancelReset');
+            const otpInput = document.getElementById('otpInput');
+            const newPassword = document.getElementById('newPassword');
+            const submitReset = document.getElementById('submitReset');
+            const backToStep1 = document.getElementById('backToStep1');
+            const resetMessage = document.getElementById('resetMessage');
+
+            function showToast(message, type = 'error') {
+                let container = document.getElementById('toast-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'toast-container';
+                    document.body.appendChild(container);
+                }
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                const icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
+                toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.add('hide');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+            }
+
+            function validateEmailInput(email) {
+                const emailRegex = /^[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]{2,}\.[a-zA-Z]{2,10}$/;
+                const trimmedEmail = email.trim().toLowerCase();
+
+                if (!trimmedEmail) return { valid: false, msg: 'Email is required' };
+                if (!emailRegex.test(trimmedEmail)) {
+                    return { valid: false, msg: 'Please enter a valid email address' };
+                }
+
+                const [local, domain] = trimmedEmail.split('@');
+
+                if (local.length < 3) {
+                    return { valid: false, msg: 'Email prefix is too short (min 3 characters)' };
+                }
+                if (domain.length < 4) {
+                    return { valid: false, msg: 'Domain name is too short' };
+                }
+
+                const domainPrefix = domain.split('.')[0];
+                if (domainPrefix === 'g' || domainPrefix === 'gm' || domainPrefix === 'gmai') {
+                    return { valid: false, msg: 'Invalid domain. Did you mean gmail.com?' };
+                }
+                if (domainPrefix === 'y' || domainPrefix === 'yah' || domainPrefix === 'yaho') {
+                    return { valid: false, msg: 'Invalid domain. Did you mean yahoo.com?' };
+                }
+
+                return { valid: true };
+            }
+
+            const loginEmailInput = document.getElementById('email');
+            loginEmailInput.addEventListener('blur', function () {
+                const validation = validateEmailInput(this.value);
+                if (this.value && !validation.valid) {
+                    showToast(validation.msg, 'error');
+                    this.style.borderColor = '#e53e3e';
+                    loginError.style.display = 'none';
+                } else {
+                    this.style.borderColor = 'var(--blue-200)';
+                }
+            });
+
+            const resetEmailInput = document.getElementById('resetEmail');
+            resetEmailInput.addEventListener('blur', function () {
+                const validation = validateEmailInput(this.value);
+                if (this.value && !validation.valid) {
+                    showToast(validation.msg, 'error');
+                    this.style.borderColor = '#e53e3e';
+                    resetMessage.style.display = 'none';
+                } else {
+                    this.style.borderColor = 'var(--blue-200)';
+                }
+            });
+
+            // Password visibility toggle
+            togglePassword?.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.innerHTML = type === 'password' ? '<i class="fa-solid fa-eye"></i>' : '<i class="fa-solid fa-eye-slash"></i>';
+            });
+
+            // --- Forgot Password Flow ---
+            forgotLink?.addEventListener('click', (e) => {
+                e.preventDefault();
+                resetMessage.style.display = 'none';
+                resetEmail.value = '';
+                step1.style.display = 'block';
+                step2.style.display = 'none';
+                forgotModal.style.display = 'flex';
+            });
+
+            cancelReset?.addEventListener('click', () => forgotModal.style.display = 'none');
+
+            sendReset?.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const email = resetEmail.value.trim();
+
+                const emailValidation = validateEmailInput(email);
+                if (!emailValidation.valid) {
+                    showToast(emailValidation.msg, 'error');
+                    return;
+                }
+
+                sendReset.disabled = true;
+                sendReset.textContent = 'Sending...';
+
+                try {
+                    const res = await fetch('/api/auth/forgot-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        showMessage(data.msg, 'success');
+                        setTimeout(() => {
+                            resetMessage.style.display = 'none';
+                            step1.style.display = 'none';
+                            step2.style.display = 'block';
+                        }, 1000);
+                    } else {
+                        showMessage(data.msg, 'error');
+                    }
+                } catch (err) {
+                    showMessage('Server error. Try again.', 'error');
+                } finally {
+                    sendReset.disabled = false;
+                    sendReset.textContent = 'Send OTP';
+                }
+            });
+
+            submitReset?.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const otp = otpInput.value.trim();
+                const pwd = newPassword.value;
+                const email = resetEmail.value.trim();
+
+                if (otp.length !== 6 || !pwd) {
+                    showMessage('Please enter valid details.', 'error');
+                    return;
+                }
+
+                submitReset.disabled = true;
+                submitReset.textContent = 'Resetting...';
+
+                try {
+                    const res = await fetch('/api/auth/reset-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, otp, newPassword: pwd })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        showMessage(data.msg, 'success');
+                        setTimeout(() => {
+                            forgotModal.style.display = 'none';
+                            // Optionally fill login email
+                            document.getElementById('email').value = email;
+                        }, 2000);
+                    } else {
+                        showMessage(data.msg, 'error');
+                    }
+                } catch (err) {
+                    showMessage('Failed to reset password.', 'error');
+                } finally {
+                    submitReset.disabled = false;
+                    submitReset.textContent = 'Reset Password';
+                }
+            });
+
+            backToStep1?.addEventListener('click', () => {
+                step2.style.display = 'none';
+                step1.style.display = 'block';
+                resetMessage.style.display = 'none';
+            });
+
+            function showMessage(msg, type) {
+                resetMessage.style.display = 'block';
+                resetMessage.textContent = msg;
+                resetMessage.style.color = type === 'error' ? 'var(--error)' : 'var(--success)';
+                resetMessage.style.background = type === 'error' ? '#fff5f5' : '#f0fff4';
+            }
+            // ---------------------------
+
+            loginForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const email = document.getElementById('email').value.trim();
+                const password = passwordInput.value;
+
+                // Hide previous messages
+                loginError.style.display = 'none';
+                loginSuccess.style.display = 'none';
+
+                const emailValidation = validateEmailInput(email);
+                if (!emailValidation.valid) {
+                    showToast(emailValidation.msg, 'error');
+                    return;
+                }
+
+                // API Call
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Signing In...';
+
+                try {
+                    const res = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        localStorage.setItem('isLoggedIn', 'true');
+                        showSuccess('Login successful! Redirecting...');
+                        setTimeout(() => { window.location.href = 'index.html'; }, 900);
+                    } else {
+                        showError(data.msg || 'Invalid credentials');
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Sign In';
+                    }
+                } catch (err) {
+                    showError('Server error. Please check your connection.');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Sign In';
+                }
+            });
+
+            function showError(message) {
+                loginError.textContent = message;
+                loginError.style.display = 'block';
+            }
+
+            function showSuccess(message) {
+                loginSuccess.textContent = message;
+                loginSuccess.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>
