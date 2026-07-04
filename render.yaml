@@ -31,5 +31,4 @@ services:
 databases:
   - name: intellitrip-db
     databaseName: intellitrip
-    user: postgres
     plan: free
