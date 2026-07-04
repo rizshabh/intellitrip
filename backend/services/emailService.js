@@ -85,6 +85,13 @@ const emailTemplate = (content, title, headerImage = null) => {
 exports.sendOTPEmail = async (email, otp, context = 'verification') => {
     try {
         console.log(`📨 Sending OTP to ${email}`);
+        
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
+            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
+            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
+            console.log(`[EMAIL BYPASS] SMTP credentials not set. OTP for ${email} (${context}) is: ${otp}`);
+            return true;
+        }
         const content = `
             <h2 style="margin:0 0 12px;font-size:22px;font-weight:700;color:#0B3B5B">Security Verification</h2>
             <p style="margin:0 0 28px;font-size:15px;line-height:1.6;color:#475569">We've received a request to verify your identity for <strong style="color:#2A8FAA">${context}</strong>. Use the code below to proceed securely.</p>
@@ -115,6 +122,12 @@ exports.sendOTPEmail = async (email, otp, context = 'verification') => {
 
 exports.sendWelcomeEmail = async (email, name) => {
     try {
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
+            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
+            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
+            console.log(`[EMAIL BYPASS] SMTP credentials not set. Welcome email skipped for: ${email}`);
+            return true;
+        }
         const userName = name || 'Traveler';
         const content = `
             <h2 style="margin:0 0 12px;font-size:24px;font-weight:700;color:#0B3B5B">Welcome aboard, ${userName}!</h2>
@@ -155,6 +168,12 @@ exports.sendWelcomeEmail = async (email, name) => {
 
 exports.sendTripCreatedEmail = async (email, tripData, tips) => {
     try {
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
+            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
+            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
+            console.log(`[EMAIL BYPASS] SMTP credentials not set. Trip created email skipped for: ${email}`);
+            return true;
+        }
         const userName = tripData.userName || 'Traveler';
         const destination = tripData.destination || 'Your Destination';
         const budget = tripData.budget || 0;
@@ -217,6 +236,12 @@ exports.sendTripCreatedEmail = async (email, tripData, tips) => {
 
 exports.sendInvitationEmail = async (toEmail, inviterName, tripName) => {
     try {
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
+            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
+            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
+            console.log(`[EMAIL BYPASS] SMTP credentials not set. Invitation email skipped for: ${toEmail}`);
+            return true;
+        }
         const safeInviterName = inviterName || 'A friend';
         const headerImg = getDestinationImage(tripName);
 
@@ -258,6 +283,12 @@ exports.sendInvitationEmail = async (toEmail, inviterName, tripName) => {
 
 exports.sendPaymentReceivedEmail = async (toEmail, receiverName, payerName, amount, description) => {
     try {
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
+            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
+            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
+            console.log(`[EMAIL BYPASS] SMTP credentials not set. Payment email skipped for: ${toEmail}`);
+            return true;
+        }
         const safeReceiverName = receiverName || 'User';
         const safePayerName = payerName || 'A member';
 
