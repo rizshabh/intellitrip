@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS expenses CASCADE;
 DROP TABLE IF EXISTS trip_collaborators CASCADE;
 DROP TABLE IF EXISTS trips CASCADE;
 DROP TABLE IF EXISTS pending_registrations CASCADE;
+DROP TABLE IF EXISTS saved_ai_tips CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 -- 1. Users Table
@@ -106,4 +107,18 @@ CREATE TABLE notifications (
     is_read BOOLEAN DEFAULT FALSE,
     is_visible BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 8. Saved AI Tips Table
+CREATE TABLE saved_ai_tips (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(100),
+    content TEXT,
+    icon VARCHAR(50),
+    tags TEXT[],
+    city VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, title)
 );
