@@ -974,12 +974,16 @@ const generateTripItinerary = async (req, res) => {
         }
 
         if (geminiApiKey) {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const result = await model.generateContent(prompt + " Return only valid JSON.");
-            const data = safeJsonParse(result.response.text());
-            if (data && data.recommendations) {
-                console.log(`[AI Itinerary] Success with Gemini: ${data.recommendations.length} items`);
-                return res.json(data);
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const result = await model.generateContent(prompt + " Return only valid JSON.");
+                const data = safeJsonParse(result.response.text());
+                if (data && data.recommendations) {
+                    console.log(`[AI Itinerary] Success with Gemini: ${data.recommendations.length} items`);
+                    return res.json(data);
+                }
+            } catch (e) {
+                console.warn("Gemini Itinerary Generation Failed:", e.message);
             }
         }
 
@@ -1062,9 +1066,13 @@ const generateFullPlan = async (req, res) => {
 
         // Fallback to Gemini
         if (!data && geminiApiKey) {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const result = await model.generateContent(prompt + " Only JSON.");
-            data = safeJsonParse(result.response.text());
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const result = await model.generateContent(prompt + " Only JSON.");
+                data = safeJsonParse(result.response.text());
+            } catch (e) {
+                console.warn("Gemini Full Plan Generation Failed:", e.message);
+            }
         }
 
         if (!data || !data.days) {
