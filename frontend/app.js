@@ -1,4 +1,4 @@
-﻿// IntelliTrip - Complete Application JavaScript
+// IntelliTrip - Complete Application JavaScript
 // Manages both Landing Page and Dashboard functionality
 
 // Prevent duplicate class declaration
@@ -2891,6 +2891,7 @@ if (typeof IntelliTripApp !== 'undefined') {
             } catch (err) {
                 console.error(err);
                 this.showToast(err.message || 'Error creating trip', 'error');
+                throw err;
             }
         }
 

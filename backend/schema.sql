@@ -1,15 +1,5 @@
--- Drop existing tables if they exist to apply the clean, complete schema
-DROP TABLE IF EXISTS notifications CASCADE;
-DROP TABLE IF EXISTS itinerary_items CASCADE;
-DROP TABLE IF EXISTS expenses CASCADE;
-DROP TABLE IF EXISTS trip_collaborators CASCADE;
-DROP TABLE IF EXISTS trips CASCADE;
-DROP TABLE IF EXISTS pending_registrations CASCADE;
-DROP TABLE IF EXISTS saved_ai_tips CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-
 -- 1. Users Table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -27,7 +17,7 @@ CREATE TABLE users (
 );
 
 -- 2. Pending Registrations Table
-CREATE TABLE pending_registrations (
+CREATE TABLE IF NOT EXISTS pending_registrations (
     email VARCHAR(100) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -37,7 +27,7 @@ CREATE TABLE pending_registrations (
 );
 
 -- 3. Trips Table
-CREATE TABLE trips (
+CREATE TABLE IF NOT EXISTS trips (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     destination VARCHAR(255) NOT NULL,
@@ -53,7 +43,7 @@ CREATE TABLE trips (
 );
 
 -- 4. Trip Collaborators Table
-CREATE TABLE trip_collaborators (
+CREATE TABLE IF NOT EXISTS trip_collaborators (
     trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     status VARCHAR(20) DEFAULT 'pending',
@@ -61,7 +51,7 @@ CREATE TABLE trip_collaborators (
 );
 
 -- 5. Expenses Table
-CREATE TABLE expenses (
+CREATE TABLE IF NOT EXISTS expenses (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
@@ -79,7 +69,7 @@ CREATE TABLE expenses (
 );
 
 -- 6. Itinerary Items Table
-CREATE TABLE itinerary_items (
+CREATE TABLE IF NOT EXISTS itinerary_items (
     id SERIAL PRIMARY KEY,
     trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
     day_number INTEGER NOT NULL,
@@ -96,7 +86,7 @@ CREATE TABLE itinerary_items (
 );
 
 -- 7. Notifications Table
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     type VARCHAR(50),
@@ -110,7 +100,7 @@ CREATE TABLE notifications (
 );
 
 -- 8. Saved AI Tips Table
-CREATE TABLE saved_ai_tips (
+CREATE TABLE IF NOT EXISTS saved_ai_tips (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
