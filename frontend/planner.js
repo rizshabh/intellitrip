@@ -10,7 +10,7 @@ class TripPlanner {
         this.usedRecommendationTitles = new Set();
         this.userLocation = null;
         this.locationRefreshed = false;
-        this.baseUrl = 'http://localhost:5000/api';
+        this.baseUrl = this.app ? this.app.getApiUrl('/api') : '/api';
         this.map = null;
         this.markers = [];
         this.routeLine = null;

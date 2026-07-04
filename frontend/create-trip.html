@@ -655,7 +655,7 @@
       }, 500);
 
       // 2. Backend Health Check
-      const healthUrl = window.app ? window.app.getApiUrl('/api/ai/health') : 'http://localhost:5000/api/ai/health';
+      const healthUrl = window.app ? window.app.getApiUrl('/api/ai/health') : '/api/ai/health';
       try {
         console.log('🔍 Checking backend health at:', healthUrl);
         const res = await fetch(healthUrl);
@@ -1057,7 +1057,7 @@
 
       try {
         const token = localStorage.getItem('token');
-        const apiUrl = window.app ? window.app.getApiUrl('/api/ai/predict-cost') : 'http://localhost:5000/api/ai/predict-cost';
+        const apiUrl = window.app ? window.app.getApiUrl('/api/ai/predict-cost') : '/api/ai/predict-cost';
 
         const res = await fetch(apiUrl, {
           method: 'POST',

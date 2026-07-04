@@ -49,7 +49,7 @@ IntelliTripApp.prototype.auditTrip = async function (tripId) {
             try {
                 const token = localStorage.getItem('token');
                 // Fetch all expenses since backend might not support query param or returns array
-                const res = await fetch(`http://localhost:5000/api/expenses`, {
+                const res = await fetch(this.getApiUrl('/api/expenses'), {
                     headers: { 'Authorization': token }
                 });
                 if (res.ok) {
