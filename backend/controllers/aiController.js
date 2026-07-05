@@ -210,7 +210,9 @@ const getSmartTips = async (req, res) => {
 
         if (finalTips.length === 0) {
             console.log('⚠️ AI keys missing or failed. Generating fallback smart tips...');
-            finalTips = getFallbackTips(selectedTheme, preferredCurrency, currencySymbol);
+            const currentTrip = currentTrips[0] || (upcomingTrips.length > 0 ? upcomingTrips[0] : null);
+            const destName = currentTrip ? currentTrip.destination : "your destination";
+            finalTips = getFallbackTips(selectedTheme, preferredCurrency, currencySymbol, destName);
         }
 
         const responseData = {
@@ -360,46 +362,141 @@ const calculateMockCost = (destination, starting_point, days, travelers, style, 
 
 // Fallback Smart Tips Generator
 const getFallbackTips = (theme, currency, symbol, destination = "your destination") => {
+    const destLower = destination.toLowerCase();
+    
+    // Curated tips for Goa
+    if (destLower.includes("goa")) {
+        return [
+            {
+                title: "Rent a Scooter",
+                category: "Travel",
+                icon: "plane",
+                content: `Renting a scooter (approx ${symbol}350/day) is the most flexible and cheapest way to travel around Goa. Always wear a helmet and carry a valid license.`,
+                tags: ["goa", "transit"],
+                city: "Goa"
+            },
+            {
+                title: "Carry Cash for Shacks",
+                category: "Budget",
+                icon: "wallet",
+                content: `Many beach shacks and local shops in Goa have poor internet connection and don't accept cards or UPI. Keep at least ${symbol}2,000 cash handy.`,
+                tags: ["goa", "finance"],
+                city: "Goa"
+            },
+            {
+                title: "Sunset at Chapora",
+                category: "Places",
+                icon: "camera",
+                content: `Hike up to Chapora Fort in the late afternoon. It offers the most iconic panoramic sunset views over Vagator Beach and the Arabian Sea.`,
+                tags: ["goa", "sightseeing"],
+                city: "Goa"
+            },
+            {
+                title: "Authentic Goan Seafood",
+                category: "Personalized",
+                icon: "lightbulb",
+                content: `Skip the main tourist restaurants and try local eateries like Mum's Kitchen or Martin's Corner for authentic Fish Curry Rice and Pork Vindaloo.`,
+                tags: ["goa", "food"],
+                city: "Goa"
+            },
+            {
+                title: "Old Goa Heritage Walk",
+                category: "Places",
+                icon: "map-marker-alt",
+                content: `Spend a morning exploring the historic churches of Old Goa, including the Basilica of Bom Jesus. Please dress modestly and respect local customs.`,
+                tags: ["goa", "culture"],
+                city: "Goa"
+            }
+        ];
+    }
+    
+    // Curated tips for Paris
+    if (destLower.includes("paris")) {
+        return [
+            {
+                title: "Navigo Transit Pass",
+                category: "Travel",
+                icon: "plane",
+                content: `Get a weekly Navigo Découverte card for unlimited Metro and RER rides. It is significantly cheaper than buying single t+ tickets.`,
+                tags: ["paris", "transit"],
+                city: "Paris"
+            },
+            {
+                title: "Louvre Ticket Booking",
+                category: "Places",
+                icon: "passport",
+                content: `Louvre museum tickets must be booked online weeks in advance. Try visiting during night openings on Fridays to enjoy smaller crowds.`,
+                tags: ["paris", "sightseeing"],
+                city: "Paris"
+            },
+            {
+                title: "Gourmet Bakery Stops",
+                category: "Personalized",
+                icon: "lightbulb",
+                content: `Grab your breakfast baguettes and pain au chocolat from local boulangeries rather than hotels. You get authentic, fresh pastries for under ${symbol}2.`,
+                tags: ["paris", "food"],
+                city: "Paris"
+            },
+            {
+                title: "Free Water Fountains",
+                category: "Budget",
+                icon: "wallet",
+                content: `Carry a reusable bottle and refill it at Wallace Fountains across Paris. They provide clean, free drinking water, saving you up to ${symbol}300 daily.`,
+                tags: ["paris", "saving"],
+                city: "Paris"
+            },
+            {
+                title: "Sacré-Cœur Sunset",
+                category: "Places",
+                icon: "camera",
+                content: `Walk up the steps of Sacré-Cœur in Montmartre at sunset. It offers a spectacular, free overview of the entire city skyline.`,
+                tags: ["paris", "views"],
+                city: "Paris"
+            }
+        ];
+    }
+
+    // Generic, but dynamically customized tips for other destinations
     return [
+        {
+            title: `Explore ${destination} Markets`,
+            category: "Places",
+            icon: "map-marker-alt",
+            content: `Visit local street bazaars and craft markets in ${destination} to find authentic souvenirs. Bargain politely to get the best prices.`,
+            tags: [destination.toLowerCase(), "shopping"],
+            city: destination
+        },
         {
             title: "Local Currency Prep",
             category: "Budget",
             icon: "wallet",
-            content: `Always keep some local cash handy for small vendors. Use local ATMs for the best exchange rates in ${currency}.`,
-            tags: ["budget", "finance"],
-            city: "General"
+            content: `Always keep some local cash handy for small vendors in ${destination}. Use local ATMs for the best exchange rates in ${currency}.`,
+            tags: [destination.toLowerCase(), "finance"],
+            city: destination
         },
         {
-            title: "Peak Travel Safety",
+            title: `Transit in ${destination}`,
             category: "Travel",
-            icon: "passport",
-            content: "Keep digital copies of your passport and visa stored securely online. It is helpful to have them accessible from anywhere during your trip.",
-            tags: ["safety", "documents"],
-            city: "General"
+            icon: "plane",
+            content: `Check if city transit cards or daily passes are available for ${destination}. They can save you a lot compared to taxi fares.`,
+            tags: [destination.toLowerCase(), "transit"],
+            city: destination
         },
         {
-            title: "Public Transit Option",
-            category: "Places",
-            icon: "map-marker-alt",
-            content: `Leverage metro networks or city passes to save on transportation. Taxis can be significantly more expensive.`,
-            tags: ["transit", "savings"],
-            city: "General"
-        },
-        {
-            title: "Regional Food Explorer",
+            title: "Dine Like a Local",
             category: "Personalized",
             icon: "lightbulb",
-            content: "Seek out highly-rated street food stalls or local diner hubs. They offer the most authentic cuisine at unbeatable prices.",
-            tags: ["food", "dining"],
-            city: "General"
+            content: `Avoid eating right next to major tourist landmarks in ${destination}. Walk a few blocks away to find authentic, cheaper local diners.`,
+            tags: [destination.toLowerCase(), "food"],
+            city: destination
         },
         {
             title: "Free Walking Tours",
             category: "Places",
             icon: "camera",
-            content: "Join free local walking tours to get acquainted with the city quickly. They provide great historical insights from local guides.",
-            tags: ["sightseeing", "tours"],
-            city: "General"
+            content: `Join a free local walking tour in ${destination} on your first day. It is the best way to get oriented and get local tips.`,
+            tags: [destination.toLowerCase(), "tours"],
+            city: destination
         }
     ];
 };
