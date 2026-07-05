@@ -1003,17 +1003,7 @@
       if (el) el.addEventListener('change', updatePreview);
     });
 
-    // Member button listeners (they might not trigger input/change on the read-only field)
-    document.getElementById('increaseMembers').addEventListener('click', () => {
-      membersInput.value = parseInt(membersInput.value) + 1;
-      updatePreview();
-    });
-    document.getElementById('decreaseMembers').addEventListener('click', () => {
-      if (parseInt(membersInput.value) > 1) {
-        membersInput.value = parseInt(membersInput.value) - 1;
-        updatePreview();
-      }
-    });
+
 
     // Run initial preview
     updatePreview();
