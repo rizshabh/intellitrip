@@ -4603,7 +4603,7 @@ if (typeof IntelliTripApp !== 'undefined') {
                 this.showToast('Generating official archive...', 'info');
 
                 // 1. ENSURE VISIBILITY: The element MUST be in the DOM and visible for a valid capture
-                if (!element || element.innerHTML.trim() === "" || (tripId && !element.getAttribute('data-active-trip') == tripId)) {
+                if (!element || element.innerHTML.trim() === "" || (tripId && element.getAttribute('data-active-trip') != tripId)) {
                     await this.viewReport(tripId);
                     element = document.getElementById('reportDetailUIBox'); // Re-select after render
                 }
@@ -4628,10 +4628,11 @@ if (typeof IntelliTripApp !== 'undefined') {
                     filename: filename,
                     image: { type: 'jpeg', quality: 1.0 },
                     html2canvas: {
-                        scale: 3,
+                        scale: 2,
                         useCORS: true,
                         letterRendering: true,
                         scrollY: 0,
+                        scrollX: 0,
                         backgroundColor: '#ffffff'
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
