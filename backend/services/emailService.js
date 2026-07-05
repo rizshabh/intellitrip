@@ -23,6 +23,56 @@ const transporter = nodemailer.createTransport({
     socketTimeout: 5000      // 5 seconds socket timeout
 });
 
+// Central Email Dispatcher supporting Resend HTTP API and Nodemailer SMTP fallback
+const sendEmail = async ({ to, subject, html, fromName = 'IntelliTrip' }) => {
+    // 1. Check if Resend is configured (HTTP-based, not blocked by Render Free Tier)
+    if (process.env.RESEND_API_KEY) {
+        try {
+            console.log(`📨 Sending via Resend API to ${to}...`);
+            const response = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: `${fromName} <onboarding@resend.dev>`,
+                    to: to,
+                    subject: subject,
+                    html: html
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`✅ Resend Email sent successfully: ${data.id}`);
+                return true;
+            } else {
+                const errData = await response.json().catch(() => ({}));
+                console.warn('❌ Resend API failed:', errData.message || response.statusText);
+            }
+        } catch (err) {
+            console.warn('❌ Resend API Error:', err.message);
+        }
+    }
+
+    // 2. Fall back to Nodemailer SMTP
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS && 
+        !process.env.EMAIL_USER.includes('your_') && !process.env.EMAIL_PASS.includes('your_') &&
+        process.env.EMAIL_USER !== '' && process.env.EMAIL_PASS !== '') {
+        
+        await transporter.sendMail({
+            from: `"${fromName}" <${process.env.EMAIL_USER}>`,
+            to: to,
+            subject: subject,
+            html: html
+        });
+        return true;
+    }
+
+    return false; // Not sent
+};
+
 const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric'
@@ -47,12 +97,10 @@ const getDestinationImage = (destination) => {
         'iceland': 'https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=800&q=80'
     };
 
-    // Check if any keyword matches
     for (const key in images) {
         if (dest.includes(key)) return images[key];
     }
 
-    // Default high-quality travel image
     return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80';
 };
 
@@ -89,12 +137,6 @@ exports.sendOTPEmail = async (email, otp, context = 'verification') => {
     try {
         console.log(`📨 Sending OTP to ${email}`);
         
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
-            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
-            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
-            console.log(`[EMAIL BYPASS] SMTP credentials not set. OTP for ${email} (${context}) is: ${otp}`);
-            return true;
-        }
         const content = `
             <h2 style="margin:0 0 12px;font-size:22px;font-weight:700;color:#0B3B5B">Security Verification</h2>
             <p style="margin:0 0 28px;font-size:15px;line-height:1.6;color:#475569">We've received a request to verify your identity for <strong style="color:#2A8FAA">${context}</strong>. Use the code below to proceed securely.</p>
@@ -109,28 +151,27 @@ exports.sendOTPEmail = async (email, otp, context = 'verification') => {
             <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.5">This is an automated security message from IntelliTrip.</p>
         `;
 
-        await transporter.sendMail({
-            from: `"IntelliTrip" <${process.env.EMAIL_USER}>`,
+        const sent = await sendEmail({
             to: email,
             subject: 'Your Verification Code - IntelliTrip',
             html: emailTemplate(content, 'Authentication Service')
         });
-        log('✅ OTP Email sent');
+
+        if (sent) {
+            log('✅ OTP Email sent');
+        } else {
+            console.log(`[EMAIL BYPASS] SMTP/API credentials not active. OTP for ${email} (${context}) is: ${otp}`);
+        }
         return true;
     } catch (error) {
         log('❌ Email Error: ' + error.message);
-        return false;
+        console.log(`[EMAIL BYPASS FALLBACK] OTP for ${email} (${context}) is: ${otp}`);
+        return true;
     }
 };
 
 exports.sendWelcomeEmail = async (email, name) => {
     try {
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
-            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
-            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
-            console.log(`[EMAIL BYPASS] SMTP credentials not set. Welcome email skipped for: ${email}`);
-            return true;
-        }
         const userName = name || 'Traveler';
         const content = `
             <h2 style="margin:0 0 12px;font-size:24px;font-weight:700;color:#0B3B5B">Welcome aboard, ${userName}!</h2>
@@ -152,16 +193,21 @@ exports.sendWelcomeEmail = async (email, name) => {
             </div>
 
             <div style="text-align:center">
-                <a href="http://localhost:5500/dashboard.html" style="display:inline-block;background:linear-gradient(135deg,#2A8FAA,#57C1D3);color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(42,143,170,0.3)">Go to Dashboard</a>
+                <a href="https://intellitrip-l0q2.onrender.com/dashboard.html" style="display:inline-block;background:linear-gradient(135deg,#2A8FAA,#57C1D3);color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(42,143,170,0.3)">Go to Dashboard</a>
             </div>
         `;
 
-        await transporter.sendMail({
-            from: `"IntelliTrip" <${process.env.EMAIL_USER}>`,
+        const sent = await sendEmail({
             to: email,
             subject: `Welcome to IntelliTrip, ${userName}`,
             html: emailTemplate(content, 'Getting Started')
         });
+
+        if (sent) {
+            log('✅ Welcome Email sent');
+        } else {
+            console.log(`[EMAIL BYPASS] Welcome email skipped for: ${email}`);
+        }
         return true;
     } catch (error) {
         console.error('❌ Welcome Email Error:', error);
@@ -171,12 +217,6 @@ exports.sendWelcomeEmail = async (email, name) => {
 
 exports.sendTripCreatedEmail = async (email, tripData, tips) => {
     try {
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
-            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
-            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
-            console.log(`[EMAIL BYPASS] SMTP credentials not set. Trip created email skipped for: ${email}`);
-            return true;
-        }
         const userName = tripData.userName || 'Traveler';
         const destination = tripData.destination || 'Your Destination';
         const budget = tripData.budget || 0;
@@ -219,17 +259,21 @@ exports.sendTripCreatedEmail = async (email, tripData, tips) => {
             </div>
 
             <div style="text-align:center">
-                <a href="http://localhost:5500/dashboard.html" style="display:inline-block;background:linear-gradient(135deg,#2A8FAA,#57C1D3);color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(42,143,170,0.3)">View Full Itinerary</a>
+                <a href="https://intellitrip-l0q2.onrender.com/dashboard.html" style="display:inline-block;background:linear-gradient(135deg,#2A8FAA,#57C1D3);color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(42,143,170,0.3)">View Full Itinerary</a>
             </div>
         `;
 
-        await transporter.sendMail({
-            from: `"IntelliTrip" <${process.env.EMAIL_USER}>`,
+        const sent = await sendEmail({
             to: email,
             subject: `Confirmed: Your Trip to ${destination}`,
             html: emailTemplate(content, 'Trip Confirmation', headerImg)
         });
-        log('✅ Trip Email sent');
+
+        if (sent) {
+            log('✅ Trip Email sent');
+        } else {
+            console.log(`[EMAIL BYPASS] Trip created email skipped for: ${email}`);
+        }
         return true;
     } catch (error) {
         log('❌ Trip Email Error: ' + error.message);
@@ -239,12 +283,6 @@ exports.sendTripCreatedEmail = async (email, tripData, tips) => {
 
 exports.sendInvitationEmail = async (toEmail, inviterName, tripName) => {
     try {
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
-            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
-            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
-            console.log(`[EMAIL BYPASS] SMTP credentials not set. Invitation email skipped for: ${toEmail}`);
-            return true;
-        }
         const safeInviterName = inviterName || 'A friend';
         const headerImg = getDestinationImage(tripName);
 
@@ -267,16 +305,21 @@ exports.sendInvitationEmail = async (toEmail, inviterName, tripName) => {
             </div>
 
             <div style="text-align:center">
-                <a href="http://localhost:5500/dashboard.html#trips" style="display:inline-block;background:linear-gradient(135deg,#2A8FAA,#57C1D3);color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(42,143,170,0.3)">Join the Trip</a>
+                <a href="https://intellitrip-l0q2.onrender.com/dashboard.html#trips" style="display:inline-block;background:linear-gradient(135deg,#2A8FAA,#57C1D3);color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(42,143,170,0.3)">Join the Trip</a>
             </div>
         `;
 
-        await transporter.sendMail({
-            from: `"IntelliTrip" <${process.env.EMAIL_USER}>`,
+        const sent = await sendEmail({
             to: toEmail,
             subject: `${safeInviterName} invited you to join a trip to ${tripName}`,
             html: emailTemplate(content, 'Collaboration Invite', headerImg)
         });
+
+        if (sent) {
+            log('✅ Invite Email sent');
+        } else {
+            console.log(`[EMAIL BYPASS] Invitation email skipped for: ${toEmail}`);
+        }
         return true;
     } catch (error) {
         console.error('❌ Invite Email Error:', error);
@@ -286,12 +329,6 @@ exports.sendInvitationEmail = async (toEmail, inviterName, tripName) => {
 
 exports.sendPaymentReceivedEmail = async (toEmail, receiverName, payerName, amount, description) => {
     try {
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
-            process.env.EMAIL_USER.includes('your_') || process.env.EMAIL_PASS.includes('your_') ||
-            process.env.EMAIL_USER === '' || process.env.EMAIL_PASS === '') {
-            console.log(`[EMAIL BYPASS] SMTP credentials not set. Payment email skipped for: ${toEmail}`);
-            return true;
-        }
         const safeReceiverName = receiverName || 'User';
         const safePayerName = payerName || 'A member';
 
@@ -305,20 +342,24 @@ exports.sendPaymentReceivedEmail = async (toEmail, receiverName, payerName, amou
             </div>
 
             <div style="text-align:center">
-                <a href="http://localhost:5500/dashboard.html" style="display:inline-block;background:linear-gradient(135deg,#2A8FAA,#57C1D3);color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(42,143,170,0.3)">View Dashboard</a>
+                <a href="https://intellitrip-l0q2.onrender.com/dashboard.html" style="display:inline-block;background:linear-gradient(135deg,#2A8FAA,#57C1D3);color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(42,143,170,0.3)">View Dashboard</a>
             </div>
         `;
 
-        await transporter.sendMail({
-            from: `"IntelliTrip" <${process.env.EMAIL_USER}>`,
+        const sent = await sendEmail({
             to: toEmail,
             subject: `Payment Received from ${safePayerName}`,
             html: emailTemplate(content, 'Expense Settlement')
         });
+
+        if (sent) {
+            log('✅ Payment Email sent');
+        } else {
+            console.log(`[EMAIL BYPASS] Payment email skipped for: ${toEmail}`);
+        }
         return true;
     } catch (error) {
         console.error('❌ Payment Email Error:', error);
         return false;
     }
 };
-
