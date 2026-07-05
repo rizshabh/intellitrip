@@ -23,9 +23,42 @@ const transporter = nodemailer.createTransport({
     socketTimeout: 5000      // 5 seconds socket timeout
 });
 
-// Central Email Dispatcher supporting Resend HTTP API and Nodemailer SMTP fallback
+// Central Email Dispatcher supporting Brevo API, Resend HTTP API, and Nodemailer SMTP fallback
 const sendEmail = async ({ to, subject, html, fromName = 'IntelliTrip' }) => {
-    // 1. Check if Resend is configured (HTTP-based, not blocked by Render Free Tier)
+    // 1. Check if Brevo API is configured (HTTP-based, not blocked by Render)
+    if (process.env.BREVO_API_KEY) {
+        try {
+            console.log(`📨 Sending via Brevo API to ${to}...`);
+            const senderEmail = process.env.BREVO_SMTP_USER || 'amanrajak657@gmail.com';
+            const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'api-key': process.env.BREVO_API_KEY,
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: { name: fromName, email: senderEmail },
+                    to: [{ email: to }],
+                    subject: subject,
+                    htmlContent: html
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`✅ Brevo Email sent successfully:`, data);
+                return true;
+            } else {
+                const errData = await response.json().catch(() => ({}));
+                console.warn('❌ Brevo API failed:', errData.message || response.statusText);
+            }
+        } catch (err) {
+            console.warn('❌ Brevo API Error:', err.message);
+        }
+    }
+
+    // 2. Check if Resend is configured (HTTP-based, not blocked by Render Free Tier)
     if (process.env.RESEND_API_KEY) {
         try {
             console.log(`📨 Sending via Resend API to ${to}...`);
@@ -56,7 +89,7 @@ const sendEmail = async ({ to, subject, html, fromName = 'IntelliTrip' }) => {
         }
     }
 
-    // 2. Fall back to Nodemailer SMTP
+    // 3. Fall back to Nodemailer SMTP
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS && 
         !process.env.EMAIL_USER.includes('your_') && !process.env.EMAIL_PASS.includes('your_') &&
         process.env.EMAIL_USER !== '' && process.env.EMAIL_PASS !== '') {
