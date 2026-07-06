@@ -47,6 +47,7 @@ exports.register = async (req, res) => {
             DO UPDATE SET name = EXCLUDED.name, password = EXCLUDED.password, otp = EXCLUDED.otp, otp_expires = EXCLUDED.otp_expires;
         `, [trimmedEmail, name, hashedPassword, otp, otpExpires]);
 
+        console.log(`*** [SIGNUP OTP] *** Email: ${trimmedEmail} | OTP: ${otp}`);
         await emailService.sendOTPEmail(trimmedEmail, otp, 'signup verification');
         res.status(200).json({ msg: 'OTP sent to your email. Please verify to complete your registration.' });
 

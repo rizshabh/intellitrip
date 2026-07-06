@@ -10,7 +10,7 @@ class TripPlanner {
         this.usedRecommendationTitles = new Set();
         this.userLocation = null;
         this.locationRefreshed = false;
-        this.baseUrl = 'http://localhost:5000/api';
+        this.baseUrl = this.app ? this.app.getApiUrl('/api') : '/api';
         this.map = null;
         this.markers = [];
         this.routeLine = null;
@@ -225,6 +225,59 @@ class TripPlanner {
                 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
                 50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255,255,255,0); }
                 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+            }
+            
+            @media (max-width: 768px) {
+                #planner-overlay .planner-header {
+                    padding: 1rem !important;
+                    flex-direction: column !important;
+                    align-items: stretch !important;
+                    gap: 0.75rem !important;
+                }
+                #planner-overlay .planner-header > div:first-child {
+                    justify-content: space-between !important;
+                    width: 100% !important;
+                }
+                #planner-overlay .planner-header > div:last-child {
+                    justify-content: space-between !important;
+                    width: 100% !important;
+                    gap: 0.5rem !important;
+                }
+                #planner-overlay .btn-header-action {
+                    padding: 0.5rem 0.75rem !important;
+                    font-size: 0.75rem !important;
+                    flex: 1 !important;
+                    justify-content: center !important;
+                }
+                #planner-overlay .planner-content {
+                    flex-direction: column !important;
+                    overflow-y: auto !important;
+                }
+                #planner-overlay .planner-sidebar {
+                    width: 100% !important;
+                    height: auto !important;
+                    max-height: 300px !important;
+                    border-right: none !important;
+                    border-bottom: 1px solid rgba(87, 193, 211, 0.15) !important;
+                }
+                #planner-overlay .sidebar-header {
+                    padding: 1rem !important;
+                }
+                #planner-overlay .sidebar-body {
+                    padding: 1rem !important;
+                }
+                #planner-overlay .planner-main {
+                    padding: 1rem !important;
+                    gap: 1rem !important;
+                    height: auto !important;
+                    overflow-x: auto !important;
+                    overflow-y: hidden !important;
+                    flex: 1 !important;
+                }
+                #planner-overlay .day-column {
+                    min-width: 290px !important;
+                    max-width: 290px !important;
+                }
             }
         `;
         document.head.appendChild(style);

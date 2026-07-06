@@ -6336,13 +6336,19 @@ input:checked+.switch-slider:before {
 }
 
 @media print {
-    body * {
-        visibility: hidden;
-    }
-
-    #reportDetailSubView,
-    #reportDetailSubView * {
-        visibility: visible;
+    /* Hide dashboard sections during print/capture */
+    .sidebar,
+    .top-bar,
+    .header-actions,
+    .templates-section,
+    .filters-section,
+    .btn-primary,
+    .btn-outline,
+    button,
+    .view:not(#reportsView),
+    #reportsView > *:not(#reportDetailSubView),
+    #reportDetailSubView > button {
+        display: none !important;
     }
 
     #reportDetailSubView {
@@ -6356,15 +6362,6 @@ input:checked+.switch-slider:before {
         z-index: 9999;
         filter: saturate(1.3) contrast(1.05);
         /* Boost vibrancy for PDF */
-    }
-
-    .sidebar,
-    .top-bar,
-    .header-actions,
-    .btn-outline,
-    .btn-primary,
-    button {
-        display: none !important;
     }
 
     * {

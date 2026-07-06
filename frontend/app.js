@@ -1,4 +1,4 @@
-﻿// IntelliTrip - Complete Application JavaScript
+// IntelliTrip - Complete Application JavaScript
 // Manages both Landing Page and Dashboard functionality
 
 // Prevent duplicate class declaration
@@ -2891,6 +2891,7 @@ if (typeof IntelliTripApp !== 'undefined') {
             } catch (err) {
                 console.error(err);
                 this.showToast(err.message || 'Error creating trip', 'error');
+                throw err;
             }
         }
 
@@ -4602,7 +4603,7 @@ if (typeof IntelliTripApp !== 'undefined') {
                 this.showToast('Generating official archive...', 'info');
 
                 // 1. ENSURE VISIBILITY: The element MUST be in the DOM and visible for a valid capture
-                if (!element || element.innerHTML.trim() === "" || (tripId && !element.getAttribute('data-active-trip') == tripId)) {
+                if (!element || element.innerHTML.trim() === "" || (tripId && element.getAttribute('data-active-trip') != tripId)) {
                     await this.viewReport(tripId);
                     element = document.getElementById('reportDetailUIBox'); // Re-select after render
                 }
@@ -4627,10 +4628,11 @@ if (typeof IntelliTripApp !== 'undefined') {
                     filename: filename,
                     image: { type: 'jpeg', quality: 1.0 },
                     html2canvas: {
-                        scale: 3,
+                        scale: 2,
                         useCORS: true,
                         letterRendering: true,
                         scrollY: 0,
+                        scrollX: 0,
                         backgroundColor: '#ffffff'
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
@@ -5753,26 +5755,26 @@ if (typeof IntelliTripApp !== 'undefined') {
 
             const modalHTML = `
         <div id="aiTipsModal" style="display:flex; position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center; background:rgba(0,0,0,0.7); backdrop-filter:blur(5px); animation:fadeIn 0.3s ease;">
-            <div style="width:95%; max-width:600px; background:white; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif;">
+            <div style="width:95%; max-width:600px; background:white; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif;" class="ai-modal-container">
                 
                 <!-- Blue Header -->
-                <div style="padding:1.5rem 2rem; background:linear-gradient(135deg, #164e63 0%, #0891b2 100%); color:white; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; flex-direction:column; gap:0.25rem;">
+                <div class="ai-modal-header" style="padding:1.5rem 2rem; background:linear-gradient(135deg, #164e63 0%, #0891b2 100%); color:white; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                    <div class="ai-modal-title-sec" style="display:flex; flex-direction:column; gap:0.25rem; min-width:200px;">
                         <h2 style="margin:0; font-size:1.4rem; font-weight:700; display:flex; align-items:center; gap:0.75rem;">
                             <i class="fas fa-magic"></i> Intelligence Hub
                         </h2>
                         <p style="margin:0; font-size:0.8rem; opacity:0.8;">AI-powered travel strategy & optimization</p>
                     </div>
-                    ${this.currentWeather ? `
-                    <div id="aiWeatherWidget" title="Real-time Weather" style="cursor:help; background:rgba(255,255,255,0.1); padding:0.4rem 0.8rem; border-radius:12px; display:flex; align-items:center; gap:0.5rem; backdrop-filter:blur(10px); margin-left: auto; margin-right: 1rem; border:1px solid rgba(255,255,255,0.15);">
-                        <img src="https://openweathermap.org/img/wn/${this.currentWeather.icon}@2x.png" style="width:32px; height:32px; filter: brightness(1.2);">
-                        <div style="line-height:1.1;">
-                            <div style="font-weight:800; font-size:1.1rem; letter-spacing:-0.5px;">${this.currentWeather.temp}°</div>
-                            <div style="font-size:0.6rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.1em; font-weight:700;">${this.currentWeather.location}</div>
+                    <div class="ai-modal-right-sec" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; margin-left:auto;">
+                        ${this.currentWeather ? `
+                        <div id="aiWeatherWidget" title="Real-time Weather" style="cursor:help; background:rgba(255,255,255,0.1); padding:0.4rem 0.8rem; border-radius:12px; display:flex; align-items:center; gap:0.5rem; backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.15);">
+                            <img src="https://openweathermap.org/img/wn/${this.currentWeather.icon}@2x.png" style="width:32px; height:32px; filter: brightness(1.2);">
+                            <div style="line-height:1.1; text-align:left;">
+                                <div style="font-weight:800; font-size:1.1rem; letter-spacing:-0.5px;">${this.currentWeather.temp}°</div>
+                                <div style="font-size:0.6rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.1em; font-weight:700;">${this.currentWeather.location}</div>
+                            </div>
                         </div>
-                    </div>
-                    ` : ''}
-                    <div style="display:flex; gap:0.75rem; align-items:center;">
+                        ` : ''}
                         <button onclick="app.refreshAITips()" id="refreshTipsBtn" style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); padding:0.5rem 0.75rem; border-radius:8px; color:white; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; transition: all 0.2s; backdrop-filter:blur(4px);">
                             <i class="fas fa-sync-alt"></i> Refresh
                         </button>
@@ -5862,6 +5864,41 @@ if (typeof IntelliTripApp !== 'undefined') {
                     justify-content:center; 
                     font-size:1.1rem;
                     flex-shrink: 0;
+                }
+                
+                @media (max-width: 576px) {
+                    #aiTipsModal {
+                        align-items: flex-end !important;
+                    }
+                    .ai-modal-container {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        height: 85vh !important;
+                        border-radius: 20px 20px 0 0 !important;
+                    }
+                    .ai-modal-header {
+                        padding: 1rem 1.25rem !important;
+                        flex-direction: column !important;
+                        align-items: flex-start !important;
+                        gap: 0.75rem !important;
+                    }
+                    .ai-modal-title-sec {
+                        min-width: 100% !important;
+                    }
+                    .ai-modal-right-sec {
+                        margin-left: 0 !important;
+                        width: 100% !important;
+                        justify-content: space-between !important;
+                    }
+                    #aiTipsContent {
+                        padding: 1.25rem 1rem !important;
+                        min-height: auto !important;
+                        max-height: calc(85vh - 160px) !important;
+                    }
+                    .ai-card-item {
+                        padding: 1rem !important;
+                        gap: 0.75rem !important;
+                    }
                 }
             </style>
         </div>

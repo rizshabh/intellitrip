@@ -84,8 +84,17 @@ app.listen(PORT, async () => {
     try {
         const res = await db.query('SELECT NOW()');
         console.log('Database connection verified at:', res.rows[0].now);
+
+        // Auto-initialize schema if tables don't exist
+        const schemaPath = path.join(__dirname, 'schema.sql');
+        if (fs.existsSync(schemaPath)) {
+            console.log('Found schema.sql, initializing tables...');
+            const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+            await db.query(schemaSql);
+            console.log('Database tables verified/initialized successfully.');
+        }
     } catch (err) {
-        console.error('Database connection failed on startup:', err);
+        console.error('Database connection or initialization failed on startup:', err);
     }
 });
 

@@ -109,6 +109,47 @@
       overflow: hidden;
     }
 
+    @media (max-width: 992px) {
+      .main-content {
+        margin-left: 0 !important;
+        height: auto !important;
+        overflow-y: auto !important;
+      }
+      body {
+        overflow-y: auto !important;
+        height: auto !important;
+      }
+      .create-trip-container {
+        padding: 1rem !important;
+        height: auto !important;
+        overflow-y: auto !important;
+      }
+      .create-trip-grid {
+        grid-template-columns: 1fr !important;
+        height: auto !important;
+        overflow: visible !important;
+        gap: 1.5rem !important;
+      }
+      .scrollable-card {
+        height: auto !important;
+        overflow-y: visible !important;
+      }
+      #mobileMenuBtn {
+        display: block !important;
+      }
+      .top-bar-right {
+        margin-left: auto;
+      }
+    }
+
+    @media (max-width: 600px) {
+      /* Force all 2-column inline-styled rows inside form to stack on mobile */
+      #tripForm div[style*="grid-template-columns"],
+      #tripForm .form-row {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
     /* Autocomplete Styles */
     .autocomplete-container {
       position: relative;
@@ -296,7 +337,11 @@
   <main class="main-content">
     <!-- Top Bar -->
     <header class="top-bar">
-      <div class="top-bar-left">
+      <div class="top-bar-left" style="display: flex; align-items: center;">
+        <button class="mobile-menu-btn" id="mobileMenuBtn"
+          style="display: none; background: none; border: none; font-size: 1.25rem; color: #1e293b; cursor: pointer; margin-right: 1rem;">
+          <i class="fas fa-bars"></i>
+        </button>
         <div class="page-title">
           <h1>Create New Trip</h1>
           <p class="page-subtitle">Plan your next adventure</p>
@@ -655,7 +700,7 @@
       }, 500);
 
       // 2. Backend Health Check
-      const healthUrl = window.app ? window.app.getApiUrl('/api/ai/health') : 'http://localhost:5000/api/ai/health';
+      const healthUrl = window.app ? window.app.getApiUrl('/api/ai/health') : '/api/ai/health';
       try {
         console.log('🔍 Checking backend health at:', healthUrl);
         const res = await fetch(healthUrl);
@@ -1003,17 +1048,7 @@
       if (el) el.addEventListener('change', updatePreview);
     });
 
-    // Member button listeners (they might not trigger input/change on the read-only field)
-    document.getElementById('increaseMembers').addEventListener('click', () => {
-      membersInput.value = parseInt(membersInput.value) + 1;
-      updatePreview();
-    });
-    document.getElementById('decreaseMembers').addEventListener('click', () => {
-      if (parseInt(membersInput.value) > 1) {
-        membersInput.value = parseInt(membersInput.value) - 1;
-        updatePreview();
-      }
-    });
+
 
     // Run initial preview
     updatePreview();
@@ -1057,7 +1092,7 @@
 
       try {
         const token = localStorage.getItem('token');
-        const apiUrl = window.app ? window.app.getApiUrl('/api/ai/predict-cost') : 'http://localhost:5000/api/ai/predict-cost';
+        const apiUrl = window.app ? window.app.getApiUrl('/api/ai/predict-cost') : '/api/ai/predict-cost';
 
         const res = await fetch(apiUrl, {
           method: 'POST',
